@@ -2016,7 +2016,7 @@ pre code {
   left: 0;
   margin: 0;
   position: absolute;
-  top: 0;
+  top: 20px;
   width: 100%;
 }
 .post-gallery {
@@ -2047,7 +2047,7 @@ pre code {
 }
 .posts-expand .post-header {
   font-size: 1.125em;
-  margin-bottom: 60px;
+  margin-bottom: 25px;
   text-align: center;
 }
 .posts-expand .post-title {
@@ -2057,7 +2057,7 @@ pre code {
   overflow-wrap: break-word;
 }
 .posts-expand .post-title-link {
-  border-bottom: none;
+  border-bottom: 50px;
   color: var(--link-color);
   display: inline-block;
   position: relative;
@@ -2869,10 +2869,10 @@ mark.search-keyword {
 }
 .post-body h1,
 .post-body h2 {
-  border-bottom: 1px solid #eee;
+  border-bottom: 0 solid #eee;
 }
 .post-body h3 {
-  border-bottom: 1px dotted #eee;
+  border-bottom: 0;
 }
 @media (min-width: 768px) and (max-width: 991px) {
   .main-inner {
