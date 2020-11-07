@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://pyyya.com/categories/index.html</loc>
+    <loc>https://pyyya.com/2020/11/03/%E5%9B%BE%E5%BA%8A%E6%B5%8B%E8%AF%95/</loc>
     
-    <lastmod>2020-11-03</lastmod>
+    <lastmod>2020-11-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://pyyya.com/2020/11/03/%E5%9B%BE%E5%BA%8A%E6%B5%8B%E8%AF%95/</loc>
+    <loc>https://pyyya.com/categories/index.html</loc>
     
     <lastmod>2020-11-03</lastmod>
     
@@ -32,7 +32,7 @@
 
   <url>
     <loc>https://pyyya.com/</loc>
-    <lastmod>2020-11-06</lastmod>
+    <lastmod>2020-11-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -40,7 +40,7 @@
   
   <url>
     <loc>https://pyyya.com/tags/hexo/</loc>
-    <lastmod>2020-11-06</lastmod>
+    <lastmod>2020-11-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
