@@ -65,6 +65,18 @@
     background-color: #49b1f5;
   }
 
+/*鼠标样式*/
+
+body {
+    cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/default.cur),
+        default;
+}
+a,
+img {
+    cursor: url(https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/img/pointer.cur),
+        default;
+}
+
   /* 页脚footer */
 /* 渐变色滚动动画 */
 
