@@ -87,6 +87,8 @@ markdown_extensions:
       line_spans: __span
       # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#+pymdownx.highlight.pygments_lang_class
       pygments_lang_class: true
+  - admonition
+  - pymdownx.details    
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences

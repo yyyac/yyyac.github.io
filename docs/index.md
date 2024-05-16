@@ -24,3 +24,6 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
 $2313213$
 $\frac{1}{2}$
+
+!!! note
+    这是一个笔记
