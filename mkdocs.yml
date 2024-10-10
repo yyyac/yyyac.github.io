@@ -1,5 +1,14 @@
 site_name: Blog
 site_url: https://yyyac.github.io
+
+# [Navigtion]
+nav:
+  - 算法刷题:
+    - ALGORITHM/index.md
+    - ALGORITHM/basic.md
+  - 网站:
+    - WEBSITE/index.md  
+
 theme:
   name: material
   language: zh
