@@ -6,8 +6,12 @@ nav:
   - 算法刷题:
     - ALGORITHM/index.md
     - ALGORITHM/basic.md
+  - 深度学习:
+    - DeepL/index.md
+    - 扩散模型:
+      - DeepL/DDPM/ddpm.md
   - 网站:
-    - WEBSITE/index.md  
+    - WEBSITE/index.md
 
 theme:
   name: material
