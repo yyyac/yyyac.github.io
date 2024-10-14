@@ -3,9 +3,15 @@ site_url: https://yyyac.github.io
 
 # [Navigtion]
 nav:
+  - 开发:
+    - DEV/index.md
+    - C++:
+      - DEV/Cpp/1.md
+
   - 算法刷题:
     - ALGORITHM/index.md
-    - ALGORITHM/basic.md
+    - 算法基础:
+      - ALGORITHM/basic/search.md
   - 深度学习:
     - DeepL/index.md
     - 扩散模型:
