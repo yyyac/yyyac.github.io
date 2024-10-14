@@ -10,8 +10,8 @@ nav:
     - DeepL/index.md
     - 扩散模型:
       - DeepL/DDPM/ddpm.md
-  - 网站:
-    - WEBSITE/index.md
+  - 测试:
+    - TEST/index.md
 
 theme:
   name: material
