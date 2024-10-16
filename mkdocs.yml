@@ -16,6 +16,8 @@ nav:
     - DeepL/index.md
     - 扩散模型:
       - DeepL/DDPM/ddpm.md
+    - 论文:
+      - DeepL/Paper/TimeGrad.md
   - 测试:
     - TEST/index.md
 
@@ -121,3 +123,13 @@ markdown_extensions:
 extra_javascript:
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
+
+extra_css:
+  # [数学公式支持]
+  # https://squidfunk.github.io/mkdocs-material/reference/math/#katex
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css
+  # [自定义 css]
+  # 不使用底部的翻页
+  # - mkdocs/css/no-footer.css
+  # 无序列表符号自定义
+  # - mkdocs/css/unordered-list-symbols.css
