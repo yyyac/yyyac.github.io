@@ -19,7 +19,7 @@ $$
 
 将多变量时间序列的实体表示为 $x_{i, t}^{0} \in \mathbb{R}$，其中 $i \in\{1, \ldots, D\}$ 且 $t$ 为时间索引。因此 $t$ 时刻的多变量向量表示为 $x_t^{0} \in \mathbb{R}$。任务是预测在未来某个给定时间步的多变量分布。接下来考虑时间序列 $t \in [1, T]$，该序列是从训练数据的完整时间序列历史中采样的，将这段连续的序列分为上下文窗口（大小为 $[1,t_0]$ 和预测区间 $[t_0,T]$）
 
-为了建模时间动态性，采样了 RNN 结构，该结构利用 LSTM 或 GRU 来编码时间点 t 之前的时序列，以在给定协变量 $c_t$ 的情况下，更新隐状态：
+为了建模时间动态性，采样了 RNN 结构，该结构利用 LSTM 或 GRU 来编码时间点 t 之前的时序列，以在给定协变量 $c_t$ 的情况下，更新隐状态。它保存的是之前时间步的信息，从而维持时间序列的依赖关系。
 
 $$
 \mathbf{h}_{t}=\operatorname{RNN}_{\theta}\left(\operatorname{concat}\left(\mathbf{x}_{t}^{0}, \mathbf{c}_{t}\right), \mathbf{h}_{t-1}\right)
@@ -27,8 +27,19 @@ $$
 
 ![Forward](images/Time%20Grad%20forward.jpg)
 
+![Sample](images/Time%20Grad%20Sample.jpg)
+
 下图为 TimeGrad 原理图，利用 $x_{t-1}$ 和 $c_{t-1}$ 以及 $h_{t-2}$ 通过产生 t-1 时刻的隐状态，再通过 DDPM 由 $h_{t-1}$ 和 $x_t$ 生成前一阶段的序列值。
 
-![time Grad](images/Time%20Grad.jpg)
+![Time Grad](images/Time%20Grad.jpg)
 
 在训练集的最后一个上下文大小的窗口上运行 RNN，以获取隐状态 $h_t$，然后根据采样算法获得下一个时间步的样本 $x^0_{T+1}$，将其与协变量 $c_{T+1}$ 一起自回归传递到 RNN 以获得下一个隐状态 $h_{t+1}$，并重复粗过程直到达到期望的预测范围。
+
+
+下图为 Time Grad 模型结构图。输入为带有噪声的时间序列 $x^n_t$，当前扩散步骤的噪声量级 $n$，以及序列之间时间步的隐状态 $h_{t-1}$。
+
+输入$x^n_t$首先经过1*1的卷积和ReLU激活函数。目的是进行通道上的线性变换，增加模型的非线性能力。之后经过卷积处理的特征与噪声结合
+
+![Architecture](images/Time%20Grad%20Architecture.jpg)
+
+
