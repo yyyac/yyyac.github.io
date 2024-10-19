@@ -37,3 +37,5 @@ git pull测试
 pull
 
 long time update
+
+域名添加测试
