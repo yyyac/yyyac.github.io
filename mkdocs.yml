@@ -14,10 +14,9 @@ nav:
       - ALGORITHM/basic/search.md
   - 深度学习:
     - DeepL/index.md
-    - 扩散模型:
-      - DeepL/DDPM/ddpm.md
     - 论文:
       - DeepL/Paper/TimeGrad.md
+      - DeepL/Paper/Transformer.md
   - 测试:
     - TEST/index.md
 
