@@ -39,3 +39,5 @@ pull
 long time update
 
 域名添加测试 dns
+
+new
