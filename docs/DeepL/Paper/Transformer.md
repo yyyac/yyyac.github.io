@@ -32,8 +32,15 @@ Encoder 由 6 个相同的层叠加而成，每个层有 2 个子层。第一个
 
 该层由残差连接和层归一化两部分组成，计算公式如下。其中 X 表示多头注意力或者 Feed Forward 的输入，MultiHeadAttention(X)和 FeedForward(X)表示输出。
 
+第一个子层为：
+
 $$
-LayerNorm(X + MultiHeadAttention(X))\\
+LayerNorm(X + MultiHeadAttention(X))
+$$
+
+第二个子层为：
+
+$$
 LayerNorm(X + FeedForward(X))
 $$
 
