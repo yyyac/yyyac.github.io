@@ -20,9 +20,9 @@ $$
 \operatorname{Attention}(Q, K, V)=\operatorname{softmax}\left(\frac{Q K^{T}}{\sqrt{d_{k}}}\right) V
 $$
 
-![](images/selfattention.png)
+![](images/selfattention.jpg)
 
-![](images/Scaled%20Dot-Product%20Attention.png)
+![](images/Scaled%20Dot-Product%20Attention.jpg)
 
 ## Encoder 结构
 
