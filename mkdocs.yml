@@ -7,7 +7,7 @@ nav:
     - DEV/index.md
     - C++:
       - DEV/Cpp/1.md
-
+      - DEV/Cpp/2.md
   - 算法刷题:
     - ALGORITHM/index.md
     - 算法基础:
