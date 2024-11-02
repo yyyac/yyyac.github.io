@@ -33,7 +33,7 @@ def get_attn_subsequence_mask(seq):
     return subsequence_mask  # [batch_size, tgt_len, tgt_len]
 ```
 
-在训练时，是把正确结果传入 Decoder。由于采用了 Self-Attention，会关注到所有信息，但模型不应知道当前时刻之后的信息，所有要进行 mask 处理。通过计算得到 Scaled Scores 后，只需再生成一个下三角全为 0，上三角全为负无穷的矩阵，然后与 Scaled Scores 相加即可。之后再做 softmax，就能将负无穷变为 0，因此当前时刻之后的信息也就被掩盖了。
+在训练时，是把正确结果传入 Decoder。由于采用了 Self-Attention，模型会关注到所有信息，但模型不应知道当前时刻之后的信息，所有要进行 mask 处理。通过计算得到 Scaled Scores 后，只需再生成一个下三角全为 0，上三角全为负无穷的矩阵，然后与 Scaled Scores 相加即可。之后再做 softmax，就能将负无穷变为 0，因此当前时刻之后的信息也就被掩盖了。
 
 ## FeedForward Layer
 
