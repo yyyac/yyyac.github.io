@@ -117,6 +117,8 @@ markdown_extensions:
   # [Markdown footnote 语法支持]
   # https://squidfunk.github.io/mkdocs-material/reference/footnotes/
   - footnotes
+  - attr_list
+  - md_in_html
 
 #数学公式
 extra_javascript:
