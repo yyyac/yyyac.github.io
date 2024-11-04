@@ -15,6 +15,7 @@ nav:
       - ALGORITHM/basic/search.md
   - 深度学习:
     - DeepL/index.md
+    - DeepL/code.md
     - 论文:
       - DeepL/Paper/Transformer.md
   - 测试:
