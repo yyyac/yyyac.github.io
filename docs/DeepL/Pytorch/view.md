@@ -1,10 +1,19 @@
-# pytorch 操作注意事项
-
-## `view` 和 `reshape`
+# `view` 和 `reshape`
 
 `view` 和 `reshape` 是 PyTorch 中常用的张量变形方法，两者看似相似，但在内存处理和使用限制上有一些区别。下面解释它们的区别并通过例子展示用法。
 
-### `view`
+## `contiguous`
+
+```python
+if self.mix:
+    out = out.transpose(2, 1).contiguous()
+out = out.view(B, L, -1)
+
+```
+
+在 PyTorch 中，view 操作要求张量在内存中是连续的。由于 transpose 往往会导致张量变成非连续的布局，必须在 view 之前调用 contiguous() 来保证数据的连续性，以避免报错。
+
+## `view`
 
 - **作用**：`view` 是对张量进行重新形状调整，返回一个新的张量，但它共享原始张量的内存。
 - **要求**：由于 `view` 共享内存，它要求原张量在内存中是连续的。使用 `view` 之前，可以调用 `.contiguous()` 方法确保连续性。
@@ -19,7 +28,7 @@ import torch
 tensor = torch.tensor([[1, 2, 3], [4, 5, 6]])
 
 # 使用 view 改变形状
-tensor_view = tensor.view(3, 2)
+tensor_view = tensor.contiguous().view(3, 2)
 
 print("Original tensor:\n", tensor)
 print("View tensor:\n", tensor_view)
@@ -31,7 +40,7 @@ print("Original tensor:\n", tensor)
 print("View tensor:\n", tensor_view)
 ```
 
-### `reshape`
+## `reshape`
 
 - **作用**：`reshape` 也用于改变张量的形状，但与 `view` 不同，它会尝试创建一个新的内存空间，且不要求输入张量在内存中是连续的。
 - **灵活性**：`reshape` 会根据需要在非连续内存的情况下创建一个新的张量。若原始张量是连续的，`reshape` 通常会直接返回共享内存的新形状张量（与 `view` 类似）；否则会创建一个新的副本。

@@ -15,9 +15,11 @@ nav:
       - ALGORITHM/basic/search.md
   - 深度学习:
     - DeepL/index.md
-    - DeepL/code.md
+    - pytorch 基本操作:
+      - DeepL/Pytorch/view.md
     - 论文:
       - DeepL/Paper/Transformer.md
+      - DeepL/Paper/informer.md
   - 测试:
     - TEST/index.md
 
