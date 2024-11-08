@@ -334,3 +334,140 @@ def _prob_QK(self, Q, K, sample_k, n_top): # n_top: c*ln(L_q)
 
     return Q_K, M_top
 ```
+
+## Decoder
+
+Decoder 的 Embedding 与 Encoder 的 Embedding 操作完全相同，只是输入变为 `[32,72,7]`
+
+DecoderLayer
+
+```python
+def forward(self, x, cross, x_mask=None, cross_mask=None):
+  #x[32,72,512], cross[32,24,512]
+  x = x + self.dropout(self.self_attention(
+      x, x, x,
+      attn_mask=x_mask
+  )[0])
+  x = self.norm1(x)
+
+  x = x + self.dropout(self.cross_attention(
+      x, cross, cross,
+      attn_mask=cross_mask
+  )[0])
+
+  y = x = self.norm2(x)
+  #y[32,2048,512]
+  y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))
+  # y[32,72,512]
+  y = self.dropout(self.conv2(y).transpose(-1,1))
+
+  return self.norm3(x+y)
+```
+
+Decoder
+
+```python
+def forward(self, x, cross, x_mask=None, cross_mask=None):
+  #x[32,72,512], cross[32,24,512]
+  for layer in self.layers:
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask)
+
+  if self.norm is not None:
+    x = self.norm(x)
+
+  return x
+```
+
+
+```python
+(decoder): Decoder(
+  (layers): ModuleList(
+    (0,1): DecoderLayer(
+      (self_attention): AttentionLayer(
+        (inner_attention): ProbAttention(
+          (dropout): Dropout(p=0.05, inplace=False)
+        )
+        (query_projection): Linear(in_features=512, out_features=512, bias=True)
+        (key_projection): Linear(in_features=512, out_features=512, bias=True)
+        (value_projection): Linear(in_features=512, out_features=512, bias=True)
+        (out_projection): Linear(in_features=512, out_features=512, bias=True)
+      )
+      (cross_attention): AttentionLayer(
+        (inner_attention): FullAttention(
+          (dropout): Dropout(p=0.05, inplace=False)
+        )
+        (query_projection): Linear(in_features=512, out_features=512, bias=True)
+        (key_projection): Linear(in_features=512, out_features=512, bias=True)
+        (value_projection): Linear(in_features=512, out_features=512, bias=True)
+        (out_projection): Linear(in_features=512, out_features=512, bias=True)
+      )
+      (conv1): Conv1d(512, 2048, kernel_size=(1,), stride=(1,))
+      (conv2): Conv1d(2048, 512, kernel_size=(1,), stride=(1,))
+      (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (norm3): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+  )
+  (norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+)
+```
+
+DecoderLayer
+
+```python
+DecoderLayer(
+  (self_attention): AttentionLayer(
+    (inner_attention): ProbAttention(
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (query_projection): Linear(in_features=512, out_features=512, bias=True)
+    (key_projection): Linear(in_features=512, out_features=512, bias=True)
+    (value_projection): Linear(in_features=512, out_features=512, bias=True)
+    (out_projection): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (cross_attention): AttentionLayer(
+    (inner_attention): FullAttention(
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (query_projection): Linear(in_features=512, out_features=512, bias=True)
+    (key_projection): Linear(in_features=512, out_features=512, bias=True)
+    (value_projection): Linear(in_features=512, out_features=512, bias=True)
+    (out_projection): Linear(in_features=512, out_features=512, bias=True)
+  )
+  (conv1): Conv1d(512, 2048, kernel_size=(1,), stride=(1,))
+  (conv2): Conv1d(2048, 512, kernel_size=(1,), stride=(1,))
+  (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  (norm3): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  (dropout): Dropout(p=0.05, inplace=False)
+)
+```
+
+FullAttention
+
+```python
+AttentionLayer(
+  (inner_attention): FullAttention(
+    (dropout): Dropout(p=0.05, inplace=False)
+  )
+  (query_projection): Linear(in_features=512, out_features=512, bias=True)
+  (key_projection): Linear(in_features=512, out_features=512, bias=True)
+  (value_projection): Linear(in_features=512, out_features=512, bias=True)
+  (out_projection): Linear(in_features=512, out_features=512, bias=True)
+)
+```
+
+ProbAttention
+
+```python
+AttentionLayer(
+  (inner_attention): ProbAttention(
+    (dropout): Dropout(p=0.05, inplace=False)
+  )
+  (query_projection): Linear(in_features=512, out_features=512, bias=True)
+  (key_projection): Linear(in_features=512, out_features=512, bias=True)
+  (value_projection): Linear(in_features=512, out_features=512, bias=True)
+  (out_projection): Linear(in_features=512, out_features=512, bias=True)
+)
+```
