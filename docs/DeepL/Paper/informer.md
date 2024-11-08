@@ -33,54 +33,8 @@ Vanilla Transformer 在解决 LSTF 问题时存在三个显著限制：
 - Encoder 接受大量长序列输入。模型采用了 ProbSparse Self-Attention 代替了 Transformer 中的 Self-Attention。并且 Encoder 在堆叠时采用了 Self-Attention Distilling。
 - Decoder 同样接受长序列输入，预测部分用 0 进行 padding。结果处理后直接输出所有预测结果。
 
-### ProbSparse Self-Attention
-
-传统 Self-Attention 需要 $O(L_QL_K)$ 的内存以及二次点积计算，是其主要缺点。本文研究发现，并不是每个 Q 与 K 之间都有很高的相关性（点积），故只有少数点积对主要注意力计算有贡献，其余可以忽略。
-
-<figure markdown=span> ![](images/probsparse_intro.jpg) </figure>
-
-改进算法如下：
-
-- 输入序列长度为 96，首先在 K 中进行采样，随机选取 25 个 K。
-- 计算每个 Q 与 25 个 K 的内积。
-- 在每个 Q 的 25 个结果中，选择最大值与均值计算差异。
-- 将差异从大到小排列，选出差异前 25 大的 Q。
-- 其余淘汰的 Q 使用 V 的平均向量进行代替。
-
-### Self-Attention Distilling
-
-<figure markdown=span> ![](images/distilling.jpg) </figure>
-
-## Encoder
-
-<figure markdown=span> ![](images/InfP1.jpg) </figure>
-
-下图展示了 EncoderStack 的架构图。一个 EncoderStack 里面包括若干个级联的 Encoder，而一个 Encoder 内部又包括了若干个 EncoderLayer 和 convLayer。其中在 EncoderLayer 内部加入了 ProbSparse Self-Attention。
-
-## Decoder
-
-
-
-## 预处理（以 ETTh1 为例）
-
-下图为数据示例，其中每个一小时收集一次变压器的
-
-### Encoder 输入
-
-$X_{enc}=[32,96,7]$，本文使用了 96 个历史样本，其中每个样本有 7 个特征。
-
-$X_{mark}=[32,96,4]$，代表时间信息，将 date 拆分为年、月、日和小时。与上面的 $X_{enc}$ 对应得到所有样本对应的时间戳。
-
-### Decoder 输入
-
-$X_{dec}=[32,72,7]$
-
-$X_{mark}=[32,72,4]$
-
-
-e_layer = 3
-
 ```python
+# e_layer = 3, d_layer = 2
 Informer(
   # encoder embedding，编码器端的embedding
   (enc_embedding): DataEmbedding(
@@ -171,9 +125,26 @@ Informer(
 )
 ```
 
-Informer forward
+```python hl_lines="1"
+# enc_embedding
+def forward(self, x, x_mark):
+    #x[32,96,7],x_mark[32,96,4]
+    x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+    """
+    value_embedding x[32,96,512]
+    position_embedding x[1,96,512]
+    temporal_embedding x[32,96,512]
+    """
+    return self.dropout(x)
+#TokenEmbedding
+def forward(self, x):
+    x = self.tokenConv(x.permute(0, 2, 1)).transpose(1,2)
+    #x[32,96,512],permute用于改变张量维度顺序，不改变内容本身
+    return x
+```
 
-```python
+```python hl_lines="1"
+# Informer
 def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
         """
@@ -199,28 +170,16 @@ def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
             return dec_out[:, -self.pred_len:, :]  # [B, L, D]
 ```
 
-enc_embedding
+### Encoder
 
-```python
-def forward(self, x, x_mark):
-    #x[32,96,7],x_mark[32,96,4]
-    x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
-    """
-    value_embedding x[32,96,512]
-    position_embedding x[1,96,512]
-    temporal_embedding x[32,96,512]
-    """
-    return self.dropout(x)
-#TokenEmbedding
-def forward(self, x):
-    x = self.tokenConv(x.permute(0, 2, 1)).transpose(1,2)
-    #x[32,96,512],permute用于改变张量维度顺序，不改变内容本身
-    return x
-```
+<figure markdown=span>![](images/EncoderStack.jpg)</figure>
 
-encoder
+上图展示了 EncoderStack 的架构图。一个 EncoderStack 里面包括若干个级联的 Encoder，而一个 Encoder 内部又包括了若干个 EncoderLayer 和 ConvLayer。其中在 EncoderLayer 内部加入了 ProbSparse Self-Attention。
 
-```python
+<figure markdown=span> ![](images/InfP1.jpg) </figure>
+
+```python hl_lines="1"
+# EncodeLayer
 def forward(self, x, attn_mask=None):
     # x [B, L, D]
     # x = x + self.dropout(self.attention(
@@ -241,43 +200,92 @@ def forward(self, x, attn_mask=None):
     return self.norm2(x+y), attn
 ```
 
-Encoder
-
 ```python
-Encoder(
-  (attn_layers): ModuleList(
-    (0,1,2): EncoderLayer(
-      (attention): AttentionLayer(
-        (inner_attention): ProbAttention(
-          (dropout): Dropout(p=0.05, inplace=False)
-        )
-        (query_projection): Linear(in_features=512, out_features=512, bias=True)
-        (key_projection): Linear(in_features=512, out_features=512, bias=True)
-        (value_projection): Linear(in_features=512, out_features=512, bias=True)
-        (out_projection): Linear(in_features=512, out_features=512, bias=True)
-      )
-      (conv1): Conv1d(512, 2048, kernel_size=(1,), stride=(1,))
-      (conv2): Conv1d(2048, 512, kernel_size=(1,), stride=(1,))
-      (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-      (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-      (dropout): Dropout(p=0.05, inplace=False)
-    )
-  )
-  (conv_layers): ModuleList(
-    (0,1): ConvLayer(
-      (downConv): Conv1d(512, 512, kernel_size=(3,), stride=(1,), padding=(1,), padding_mode=circular)
-      (norm): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-      (activation): ELU(alpha=1.0)
-      (maxPool): MaxPool1d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-    )
-  )
-  (norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-)
+# Encoder
+def forward(self, x, attn_mask=None):
+  # x [B, L, D]
+  attns = []
+  if self.conv_layers is not None:
+      for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
+          x, attn = attn_layer(x, attn_mask=attn_mask)
+          x = conv_layer(x)
+          attns.append(attn)
+        x, attn = self.attn_layers[-1](x, attn_mask=attn_mask)
+        attns.append(attn)
+  else:
+      for attn_layer in self.attn_layers:
+          x, attn = attn_layer(x, attn_mask=attn_mask)
+          attns.append(attn)
+
+  if self.norm is not None:
+    x = self.norm(x)
+
+  return x, attns
 ```
 
-AttentionLayer
+### Decoder
 
-```python
+Decoder 的 Embedding 与 Encoder 的 Embedding 操作完全相同，只是输入变为 `[32,72,7]`
+
+```python hl_lines="1"
+# DecoderLayer
+def forward(self, x, cross, x_mask=None, cross_mask=None):
+  #x[32,72,512], cross[32,24,512]
+  x = x + self.dropout(self.self_attention(
+      x, x, x,
+      attn_mask=x_mask
+  )[0])
+  x = self.norm1(x)
+
+  x = x + self.dropout(self.cross_attention(
+      x, cross, cross,
+      attn_mask=cross_mask
+  )[0])
+
+  y = x = self.norm2(x)
+  #y[32,2048,512]
+  y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))
+  # y[32,72,512]
+  y = self.dropout(self.conv2(y).transpose(-1,1))
+
+  return self.norm3(x+y)
+```
+
+```python hl_lines="1"
+# Decoder
+def forward(self, x, cross, x_mask=None, cross_mask=None):
+  #x[32,72,512], cross[32,24,512]
+  for layer in self.layers:
+    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask)
+
+  if self.norm is not None:
+    x = self.norm(x)
+
+  return x
+```
+
+### ProbSparse Self-Attention
+
+传统 Self-Attention 需要 $O(L_QL_K)$ 的内存以及二次点积计算，是其主要缺点。本文研究发现，并不是每个 Q 与 K 之间都有很高的相关性（点积），故只有少数点积对主要注意力计算有贡献，其余可以忽略。
+
+<figure markdown=span> ![](images/probsparse_intro.jpg) </figure>
+
+改进算法如下：
+
+- 输入序列长度为 96，首先在 K 中进行采样，随机选取 25 个 K。
+- 计算每个 Q 与 25 个 K 的内积。
+- 在每个 Q 的 25 个结果中，选择最大值与均值计算差异。
+- 将差异从大到小排列，选出差异前 25 大的 Q。
+- 其余淘汰的 Q 使用 V 的平均向量进行代替。
+
+### Self-Attention Distilling
+
+<figure markdown=span> ![](images/distilling.jpg) </figure>
+
+
+
+```python hl_lines="1"
+# AttentionLayer
 def forward(self, queries, keys, values, attn_mask):
     # shape[queries=keys=values]:[32,96,512]
     B, L, _ = queries.shape # L，S都为96
@@ -333,141 +341,4 @@ def _prob_QK(self, Q, K, sample_k, n_top): # n_top: c*ln(L_q)
     Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1)) # factor*ln(L_q)*L_k
 
     return Q_K, M_top
-```
-
-## Decoder
-
-Decoder 的 Embedding 与 Encoder 的 Embedding 操作完全相同，只是输入变为 `[32,72,7]`
-
-DecoderLayer
-
-```python
-def forward(self, x, cross, x_mask=None, cross_mask=None):
-  #x[32,72,512], cross[32,24,512]
-  x = x + self.dropout(self.self_attention(
-      x, x, x,
-      attn_mask=x_mask
-  )[0])
-  x = self.norm1(x)
-
-  x = x + self.dropout(self.cross_attention(
-      x, cross, cross,
-      attn_mask=cross_mask
-  )[0])
-
-  y = x = self.norm2(x)
-  #y[32,2048,512]
-  y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))
-  # y[32,72,512]
-  y = self.dropout(self.conv2(y).transpose(-1,1))
-
-  return self.norm3(x+y)
-```
-
-Decoder
-
-```python
-def forward(self, x, cross, x_mask=None, cross_mask=None):
-  #x[32,72,512], cross[32,24,512]
-  for layer in self.layers:
-    x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask)
-
-  if self.norm is not None:
-    x = self.norm(x)
-
-  return x
-```
-
-
-```python
-(decoder): Decoder(
-  (layers): ModuleList(
-    (0,1): DecoderLayer(
-      (self_attention): AttentionLayer(
-        (inner_attention): ProbAttention(
-          (dropout): Dropout(p=0.05, inplace=False)
-        )
-        (query_projection): Linear(in_features=512, out_features=512, bias=True)
-        (key_projection): Linear(in_features=512, out_features=512, bias=True)
-        (value_projection): Linear(in_features=512, out_features=512, bias=True)
-        (out_projection): Linear(in_features=512, out_features=512, bias=True)
-      )
-      (cross_attention): AttentionLayer(
-        (inner_attention): FullAttention(
-          (dropout): Dropout(p=0.05, inplace=False)
-        )
-        (query_projection): Linear(in_features=512, out_features=512, bias=True)
-        (key_projection): Linear(in_features=512, out_features=512, bias=True)
-        (value_projection): Linear(in_features=512, out_features=512, bias=True)
-        (out_projection): Linear(in_features=512, out_features=512, bias=True)
-      )
-      (conv1): Conv1d(512, 2048, kernel_size=(1,), stride=(1,))
-      (conv2): Conv1d(2048, 512, kernel_size=(1,), stride=(1,))
-      (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-      (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-      (norm3): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-      (dropout): Dropout(p=0.05, inplace=False)
-    )
-  )
-  (norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-)
-```
-
-DecoderLayer
-
-```python
-DecoderLayer(
-  (self_attention): AttentionLayer(
-    (inner_attention): ProbAttention(
-      (dropout): Dropout(p=0.05, inplace=False)
-    )
-    (query_projection): Linear(in_features=512, out_features=512, bias=True)
-    (key_projection): Linear(in_features=512, out_features=512, bias=True)
-    (value_projection): Linear(in_features=512, out_features=512, bias=True)
-    (out_projection): Linear(in_features=512, out_features=512, bias=True)
-  )
-  (cross_attention): AttentionLayer(
-    (inner_attention): FullAttention(
-      (dropout): Dropout(p=0.05, inplace=False)
-    )
-    (query_projection): Linear(in_features=512, out_features=512, bias=True)
-    (key_projection): Linear(in_features=512, out_features=512, bias=True)
-    (value_projection): Linear(in_features=512, out_features=512, bias=True)
-    (out_projection): Linear(in_features=512, out_features=512, bias=True)
-  )
-  (conv1): Conv1d(512, 2048, kernel_size=(1,), stride=(1,))
-  (conv2): Conv1d(2048, 512, kernel_size=(1,), stride=(1,))
-  (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-  (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-  (norm3): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
-  (dropout): Dropout(p=0.05, inplace=False)
-)
-```
-
-FullAttention
-
-```python
-AttentionLayer(
-  (inner_attention): FullAttention(
-    (dropout): Dropout(p=0.05, inplace=False)
-  )
-  (query_projection): Linear(in_features=512, out_features=512, bias=True)
-  (key_projection): Linear(in_features=512, out_features=512, bias=True)
-  (value_projection): Linear(in_features=512, out_features=512, bias=True)
-  (out_projection): Linear(in_features=512, out_features=512, bias=True)
-)
-```
-
-ProbAttention
-
-```python
-AttentionLayer(
-  (inner_attention): ProbAttention(
-    (dropout): Dropout(p=0.05, inplace=False)
-  )
-  (query_projection): Linear(in_features=512, out_features=512, bias=True)
-  (key_projection): Linear(in_features=512, out_features=512, bias=True)
-  (value_projection): Linear(in_features=512, out_features=512, bias=True)
-  (out_projection): Linear(in_features=512, out_features=512, bias=True)
-)
 ```
