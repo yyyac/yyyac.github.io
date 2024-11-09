@@ -12,6 +12,7 @@ nav:
   - 算法刷题:
     - ALGORITHM/index.md
     - 算法基础:
+      - ALGORITHM/basic/1.md
       - ALGORITHM/basic/search.md
   - 深度学习:
     - DeepL/index.md
