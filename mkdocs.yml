@@ -17,9 +17,12 @@ nav:
     - DeepL/index.md
     - pytorch 基本操作:
       - DeepL/Pytorch/view.md
+    - 时间序列:
+      - 
     - 论文:
       - DeepL/Paper/Transformer.md
-      - DeepL/Paper/informer.md
+      - DeepL/Paper/Informer.md
+      - DeepL/Paper/Autoformer.md
   - 测试:
     - TEST/index.md
 

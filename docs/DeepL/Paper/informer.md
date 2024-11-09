@@ -342,3 +342,6 @@ def _prob_QK(self, Q, K, sample_k, n_top): # n_top: c*ln(L_q)
 
     return Q_K, M_top
 ```
+
+ETTh1 mse:0.428, mae:0.580
+ETTh2 mse:0.248, mae:0.405
