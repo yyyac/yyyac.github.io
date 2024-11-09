@@ -141,3 +141,4 @@ extra_css:
   # - mkdocs/css/no-footer.css
   # 无序列表符号自定义
   # - mkdocs/css/unordered-list-symbols.css
+  - stylesheets/extra.css
