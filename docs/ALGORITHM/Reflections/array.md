@@ -72,3 +72,123 @@ public:
     }
 };
 ```
+
+### [在排序数组中查找元素的第一个和最后一个位置](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+```C++
+class Solution {
+public:
+    int find1(vector<int>& a, int x)
+    {
+        int n = a.size();
+        int l = -1, r = n;
+        while(l + 1 != r)
+        {
+            int mid = (l + r) / 2;
+            if(a[mid] < x)
+                l = mid;
+            else
+                r = mid;
+        }
+        return r;
+    }
+    int find2(vector<int>& a, int x)
+    {
+        int n = a.size();
+    int l = -1, r = n;
+    while(l + 1 != r)
+    {
+        int mid = (l + r) / 2;
+        if(a[mid] <= x)
+            l = mid;
+        else
+            r = mid;
+    }
+    return l;
+    }
+    vector<int> searchRange(vector<int>& nums, int x) {
+        int n = nums.size() - 1;
+        if(n < 0 || nums[0] > x || nums[n] < x)
+            return vector<int> {-1,-1};
+        int res1 = find1(nums, x);
+        int res2 = find2(nums,x);
+        if(nums[res1] != x)
+            return vector<int> {-1,-1};
+        return vector<int>{res1, res2};
+
+
+        
+    }
+};
+```
+
+### [x 的平方根 ](https://leetcode.cn/problems/sqrtx/description/)
+
+```C++
+class Solution {
+public:
+    int mySqrt(int x) {
+        if(x == 0) return 0;
+        if(x == 1) return 1;
+        int l = -1, r = x;
+        while (l + 1 != r)
+        {
+            long long mid = (l + r) / 2;
+            if (mid * mid <= x)
+                l = mid;
+            else
+                r = mid;
+        }
+        return l;
+    }
+};
+```
+
+## 移除元素
+
+### [删除有序数组中的重复项](https://leetcode.cn/problems/remove-duplicates-from-sorted-array/description/)
+
+!!! note
+    - 初始化 `k = 1`，表示保留元素要填入的下标。
+    - 从 `i = 1` 开始遍历。
+    - 如果 `nums[i] == nums[i - 1]`，则 `nums[i]` 是重复项，不保留。
+    - 如果 `nums[i] != nums[i - 1]`，则 `nums[i]` 不是重复项，保留，填入 `nums[k]` 中，然后 k++。
+    - 遍历结束后，k 就是 nums 中的唯一元素的数量
+
+```C++
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int k = 1;
+        for(int i = 1; i < nums.size(); i ++)
+        {
+            if(nums[i] != nums[i - 1])
+                nums[k ++] = nums[i];
+        }
+        return k;
+    }
+};
+```
+
+### [移动零](https://leetcode.cn/problems/move-zeroes/description/)
+
+!!! note
+    从左到右遍历 `nums[i]`，同时维护另一个下标 $i_0$，保证下标区间 $[i_0,i-1]$ 都是 0，且把 $i_0$ 指向最左边的 $0$。
+    每次遇到 $nums[i] != 0$ 的情况，就把 $nums[i]$ 与 $nums[i_0]$ 交换。交换后 $i_0$ 和 $i$ 都加一，$[i_0,i-1]$ 都是 0 这一性质仍然成立。
+
+```C++
+class Solution {
+public:
+    void moveZeroes(vector<int>& nums) {
+        int i0 = 0;
+        for(int i = 0; i < nums.size(); i ++)
+        {
+            if(nums[i] != 0)
+            {    
+                swap(nums[i], nums[i0]);
+                i0 ++;
+            }
+        }
+    }
+};
+```
