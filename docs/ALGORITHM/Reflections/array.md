@@ -192,3 +192,39 @@ public:
     }
 };
 ```
+
+### [有序数组的平方](https://leetcode.cn/problems/squares-of-a-sorted-array/description/)
+
+!!! note
+    1. 初始化长为 $n$ 的数组 $ans$。
+    2. 左指针$i=0$，右指针$j=n-1$。初始化下标$p=n-1$，表示向$ans[p]$填入数据
+    3. 设$x=nums[i]^2,y=nums[j]^2$
+    4. 若$x>y$，将$x$填入$ans[p]$，反之将$y$填入$ans[p]$
+
+```C++
+class Solution {
+public:
+    vector<int> sortedSquares(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n);
+        int i = 0, j = n - 1;
+        for(int p = n - 1; p >= 0; p --)
+        {
+            // int x = nums[i] * nums[i];
+            // int y = nums[j] * nums[j];
+            int x = nums[i], y = nums[j];
+            if(-x > y)
+            {
+                ans[p] = x * x;
+                i ++;
+            }
+            else
+            {
+                ans[p] = y * y;
+                j --;
+            }
+        }
+        return ans;
+    }
+};
+```
