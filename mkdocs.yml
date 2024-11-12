@@ -9,10 +9,12 @@ nav:
       - DEV/Cpp/1.md
       - DEV/Cpp/2.md
       - DEV/Cpp/3.md
+      - DEV/Cpp/4.md
   - 算法刷题:
     - ALGORITHM/index.md
     - 算法基础:
       - ALGORITHM/basic/1.md
+      - ALGORITHM/basic/2.md
       - ALGORITHM/basic/search.md
     - 代码随想录:
       - ALGORITHM/Reflections/array.md
