@@ -1,4 +1,4 @@
-# 时间序列预测基础
+# CNN+LSTM
 
 ## Conv1D
 
@@ -43,6 +43,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle
 ```
 
 划分数据后，进行归一化。
+
+`StandardScaler`只能对二维数组的每列进行归一化，`X_train`(16,12,7)->(16*12,7)->(16,12,7)。
 
 ```python
 scaler = StandardScaler()
