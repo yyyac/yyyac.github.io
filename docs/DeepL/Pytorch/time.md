@@ -4,11 +4,7 @@
 
 在时间序列中，Conv1D 通过滑动一个卷积核来提取局部特征，每次滑动时与输入数据的一个小块进行卷积运算。卷积的目的是提取数据中的局部模式，比如趋势、周期性变化等，常用于时间序列预测、异常检测等任务。
 
-在 PyTorch 中，`Conv1d` 的输入和输出通常是一个三维张量，形状为：
-
-$$
-(batch\_size, channels, length)
-$$
+在 PyTorch 中，`Conv1d` 的输入和输出通常是一个三维张量，形状为：$(batch\_size, channels, length)$
 
 其中：
 
@@ -16,11 +12,7 @@ $$
 - $channels$：每个样本的通道数，对于一维时间序列数据通常是 1。如果是多通道数据（例如多个传感器的时间序列），则可以有多个通道。
 - $length$：时间序列的长度，即每个通道上的数据点数。
 
-卷积前后序列的长度变化为：
-
-$$
-L_{out} = \frac{L_{in} - K + 2P}{S} + 1
-$$
+卷积前后序列的长度变化为：$L_{out} = \frac{L_{in} - K + 2P}{S} + 1$
 
 在处理时间序列数据时，池化操作（如 Max Pooling 和 Average Pooling）也可以用来降低时间序列的维度，从而减少计算量并增强模型的鲁棒性。对于时间序列数据，池化操作通常是对时间步（即序列的长度）进行下采样，而不是对空间维度进行池化。池化输入输出形状和序列长度变化都与卷积相同。
 
@@ -71,7 +63,7 @@ test_loader = DataLoader(
 
 ### 模型构建
 
-`Conv1d`接受输入形状为$(batch\_size, channels, length)$，故需要先调整张量形状`x = x.permute(0, 2, 1)`。
+`Conv1d` 接受输入形状为 $(batch\_size, channels, length)$，故需要先调整张量形状 `x = x.permute(0, 2, 1)`。
 
 ```python
 class CNN_LSTM(nn.Module):
@@ -93,6 +85,11 @@ class CNN_LSTM(nn.Module):
         x = x.permute(0, 2, 1)
         _, (hn, _) = self.lstm(x)
         return self.fc(hn[-1])
+        """
+        output,_ = self.lstm(x)
+        last_output = output[:,-1,:]
+        return self.fc(last_output)
+        """
 
 
 device = ("cuda" if torch.cuda.is_available() else "cpu")
@@ -139,6 +136,7 @@ with torch.no_grad():
 test_loss /= len(test_loader)
 print(test_loss)
 
+# np.concatenate将所有批次沿着axis = 0(行方向)拼接起来，形成完整的二维数组，拼接后形状为(num_samples, output_size)
 y_pred = np.concatenate(y_pred, axis=0)
 y_true = np.concatenate(y_true, axis=0)
 
@@ -161,7 +159,7 @@ plt.legend()
 plt.savefig('ETTh1.jpg')
 ```
 
-<figure markdown=span>![](image/ETTh1.jpg)</figure>
+<figure markdown=span> ![](image/ETTh1.jpg) </figure>
 
 ### 使用时间窗口进行多步预测
 
@@ -192,7 +190,7 @@ last_test_data = X_test_scaled[-1]  # 最后一条测试数据作为起点
 predicted_future = predict_future(model, last_test_data, future_steps, scaler_y, device)
 ```
 
-<figure markdown=span>![](image/ETTh1_partial_true_future.jpg)</figure>
+<figure markdown=span> ![](image/ETTh1_partial_true_future.jpg) </figure>
 
 ### CNN_LSTM.py
 
@@ -375,5 +373,4 @@ plt.xlabel('Time (Samples)')
 plt.ylabel('Value')
 plt.legend()
 plt.savefig('ETTh1_partial_true_future.jpg')
-
 ```
