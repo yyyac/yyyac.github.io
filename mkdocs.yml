@@ -22,6 +22,7 @@ nav:
     - DeepL/index.md
     - pytorch 基本操作:
       - DeepL/Pytorch/view.md
+      - DeepL/Pytorch/time.md
     - 论文:
       - DeepL/Paper/Transformer.md
       - DeepL/Paper/informer.md
