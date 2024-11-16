@@ -47,20 +47,51 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle
 `StandardScaler`只能对二维数组的每列进行归一化，`X_train`(16,12,7)->(16*12,7)->(16,12,7)。
 
 ```python
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[2])).reshape(X_train.shape)
-X_test_scaled = scaler.transform(X_test.reshape(-1, X_test.shape[2])).reshape(X_test.shape)
+class TimeSeriesDataset(Dataset):
+    def __init__(self, data, time_step=12, is_train=True, scaler_X=None, scaler_y=None):
+        """
+        data: 输入的时间序列数据 (DataFrame)
+        time_step: 时间步长
+        is_train: 是否为训练集
+        scaler_X: 特征标准化的Scaler
+        scaler_y: 目标标准化的Scaler
+        """
+        self.time_step = time_step
+        self.is_train = is_train
 
-scaler_y = StandardScaler()
-y_train_scaled = scaler_y.fit_transform(y_train.reshape(-1, 1))
-y_test_scaled = scaler_y.transform(y_test.reshape(-1, 1))
+        # 创建样本和目标
+        X, y = self.create_dataset(data)
 
-train_loader = DataLoader(
-    TensorDataset(torch.tensor(X_train_scaled, dtype=torch.float32), torch.tensor(y_train_scaled, dtype=torch.float32)),
-    batch_size=16, shuffle=True)
-test_loader = DataLoader(
-    TensorDataset(torch.tensor(X_test_scaled, dtype=torch.float32), torch.tensor(y_test_scaled, dtype=torch.float32)),
-    batch_size=16, shuffle=False)
+        # 标准化
+        self.scaler_X = scaler_X or StandardScaler()
+        self.scaler_y = scaler_y or StandardScaler()
+
+        if self.is_train:
+            X = self.scaler_X.fit_transform(X.reshape(-1, X.shape[2])).reshape(X.shape)
+            y = self.scaler_y.fit_transform(y.reshape(-1, 1))
+        else:
+            X = self.scaler_X.transform(X.reshape(-1, X.shape[2])).reshape(X.shape)
+            y = self.scaler_y.transform(y.reshape(-1, 1))
+
+        self.X = torch.tensor(X, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.float32)
+
+    def create_dataset(self, data):
+        X, y = [], []
+        for i in range(len(data) - self.time_step):
+            X.append(data.iloc[i:i + self.time_step].values)
+            y.append(data.iloc[i + self.time_step, -1])
+        return np.array(X), np.array(y)
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
+
+    def get_scalers(self):
+        """返回特征和目标的标准化器"""
+        return self.scaler_X, self.scaler_y
 ```
 
 ### 模型构建
@@ -228,33 +259,67 @@ data = pd.read_csv("ETTh1.csv").drop(columns=['date'])
 # print(data.head())
 
 
-def create_dataset(data, time_step=12):
-    X, y = [], []
-    for i in range(len(data) - time_step):
-        X.append(data.iloc[i:i + time_step].values)
-        y.append(data.iloc[i + time_step, -1])
-    return np.array(X), np.array(y)
+class TimeSeriesDataset(Dataset):
+    def __init__(self, data, time_step=12, is_train=True, scaler_X=None, scaler_y=None):
+        """
+        data: 输入的时间序列数据 (DataFrame)
+        time_step: 时间步长
+        is_train: 是否为训练集
+        scaler_X: 特征标准化的Scaler
+        scaler_y: 目标标准化的Scaler
+        """
+        self.time_step = time_step
+        self.is_train = is_train
 
+        # 创建样本和目标
+        X, y = self.create_dataset(data)
 
-X, y = create_dataset(data, 12)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+        # 标准化
+        self.scaler_X = scaler_X or StandardScaler()
+        self.scaler_y = scaler_y or StandardScaler()
 
+        if self.is_train:
+            X = self.scaler_X.fit_transform(X.reshape(-1, X.shape[2])).reshape(X.shape)
+            y = self.scaler_y.fit_transform(y.reshape(-1, 1))
+        else:
+            X = self.scaler_X.transform(X.reshape(-1, X.shape[2])).reshape(X.shape)
+            y = self.scaler_y.transform(y.reshape(-1, 1))
 
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[2])).reshape(X_train.shape)
-X_test_scaled = scaler.transform(X_test.reshape(-1, X_test.shape[2])).reshape(X_test.shape)
+        self.X = torch.tensor(X, dtype=torch.float32)
+        self.y = torch.tensor(y, dtype=torch.float32)
 
-scaler_y = StandardScaler()
-y_train_scaled = scaler_y.fit_transform(y_train.reshape(-1, 1))
-y_test_scaled = scaler_y.transform(y_test.reshape(-1, 1))
+    def create_dataset(self, data):
+        X, y = [], []
+        for i in range(len(data) - self.time_step):
+            X.append(data.iloc[i:i + self.time_step].values)
+            y.append(data.iloc[i + self.time_step, -1])
+        return np.array(X), np.array(y)
 
-train_loader = DataLoader(
-    TensorDataset(torch.tensor(X_train_scaled, dtype=torch.float32), torch.tensor(y_train_scaled, dtype=torch.float32)),
-    batch_size=16, shuffle=True)
-test_loader = DataLoader(
-    TensorDataset(torch.tensor(X_test_scaled, dtype=torch.float32), torch.tensor(y_test_scaled, dtype=torch.float32)),
-    batch_size=16, shuffle=False)
+    def __len__(self):
+        return len(self.X)
 
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
+
+    def get_scalers(self):
+        """返回特征和目标的标准化器"""
+        return self.scaler_X, self.scaler_y
+
+time_step = 12
+
+# 数据集划分
+train_data, test_data = train_test_split(data, test_size=0.2, shuffle=False)
+
+# 初始化数据集
+train_dataset = TimeSeriesDataset(train_data, time_step, is_train=True)
+test_dataset = TimeSeriesDataset(test_data, time_step, is_train=False, scaler_X=train_dataset.scaler_X,
+                                 scaler_y=train_dataset.scaler_y)
+
+scaler_X, scaler_y = train_dataset.get_scalers()
+
+# 数据加载器
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 # 模型定义
 class CNN_LSTM(nn.Module):
@@ -359,7 +424,7 @@ def predict_future(model, last_data, future_steps, scaler_y, device):
     predictions = np.array(predictions).squeeze()  # 去掉多余的维度
     return scaler_y.inverse_transform(predictions)  # 转换回原始的尺度
 
-
+X_test_scaled = test_dataset.X.cpu().numpy()
 future_steps = 10
 last_test_data = X_test_scaled[-1]  # 最后一条测试数据作为起点
 predicted_future = predict_future(model, last_test_data, future_steps, scaler_y, device)
