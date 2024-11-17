@@ -33,9 +33,38 @@
 }
 
 .md-typeset p {
-    font-size: 1.125em;
+    font-size: 1.11em;
 }
 
 .md-typeset li {
-    font-size: 1.125em;
+    font-size: 1.1em;
 }
+
+.md-typeset th {
+    font-size: 1.1em;
+}
+
+.md-typeset td {
+    font-size: 1.1em;
+}
+
+/* .md-typeset blockquote {
+    font-size: 1.2em;
+    font-style: italic;
+    margin: 1.5em 0;
+    padding: 0 1em;
+    border-left: 0.25em solid var(--md-default-fg-color--light);
+} */
+
+/* .md-typeset code {
+    font-size: 0.9em;
+    background-color: var(--md-code-bg-color);
+    border-radius: 0.2rem;
+    padding: 0.2rem 0.4rem;
+}
+.md-typeset pre {
+    font-size: 0.9em;
+    background-color: var(--md-code-bg-color);
+    border-radius: 0.2rem;
+    padding: 0.2rem 0.4rem;
+} */

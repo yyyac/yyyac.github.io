@@ -1,4 +1,4 @@
-# CNN+LSTM
+# CNN、LSTM与GRU
 
 ## Conv1D
 
@@ -16,9 +16,7 @@
 
 在处理时间序列数据时，池化操作（如 Max Pooling 和 Average Pooling）也可以用来降低时间序列的维度，从而减少计算量并增强模型的鲁棒性。对于时间序列数据，池化操作通常是对时间步（即序列的长度）进行下采样，而不是对空间维度进行池化。池化输入输出形状和序列长度变化都与卷积相同。
 
-## CNN+LSTM
-
-### 数据处理
+## 数据处理
 
 采用时间窗口将原始时间序列划分为若干固定长度的时间片段，每个时间片段用于预测未来的值。
 
@@ -44,7 +42,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle
 
 划分数据后，进行归一化。
 
-`StandardScaler`只能对二维数组的每列进行归一化，`X_train`(16,12,7)->(16*12,7)->(16,12,7)。
+`StandardScaler` 只能对二维数组的每列进行归一化，`X_train`(16,12,7)->(16*12,7)->(16,12,7)。
 
 ```python
 class TimeSeriesDataset(Dataset):
@@ -94,7 +92,7 @@ class TimeSeriesDataset(Dataset):
         return self.scaler_X, self.scaler_y
 ```
 
-### 模型构建
+## 模型构建
 
 `Conv1d` 接受输入形状为 $(batch\_size, channels, length)$，故需要先调整张量形状 `x = x.permute(0, 2, 1)`。
 
@@ -124,7 +122,6 @@ class CNN_LSTM(nn.Module):
         return self.fc(last_output)
         """
 
-
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 # 训练
 model = CNN_LSTM(input_size=7, hidden_size=2, output_size=1, dropout_rate=0.5).to(device)
@@ -132,7 +129,7 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
 ```
 
-### 训练与测试
+## 训练与测试
 
 ```python
 avg_train_loss = 0.0
@@ -192,11 +189,19 @@ plt.legend()
 plt.savefig('ETTh1.jpg')
 ```
 
+## 预测结果
+
+CNN+LSTM：
+
 <figure markdown=span> ![](image/ETTh1.jpg) </figure>
 
-### 使用时间窗口进行多步预测
+GRU:
 
-每次预测一个时间步，并将结果作用与下一次。
+<figure markdown=span>![](image/GRU.png)</figure>
+
+## 使用时间窗口进行多步预测
+
+每次预测一个时间步，并将结果作用于下一次。
 
 ```python
 def predict_future(model, last_data, future_steps, scaler_y, device):
@@ -225,7 +230,7 @@ predicted_future = predict_future(model, last_test_data, future_steps, scaler_y,
 
 <figure markdown=span> ![](image/ETTh1_partial_true_future.jpg) </figure>
 
-### CNN_LSTM.py
+## CNN_LSTM.py
 
 ```python
 import pandas as pd
