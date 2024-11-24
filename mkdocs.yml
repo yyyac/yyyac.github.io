@@ -27,6 +27,7 @@ nav:
       - DeepL/Paper/Transformer.md
       - DeepL/Paper/informer.md
       - DeepL/Paper/Autoformer.md
+      - DeepL/Paper/PatchTST.md
   - 测试:
     - TEST/index.md
 
