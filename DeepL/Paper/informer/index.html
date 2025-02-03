@@ -1,0 +1,1945 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://yyyac.github.io/DeepL/Paper/informer/">
+      
+      
+        <link rel="prev" href="../Transformer/">
+      
+      
+        <link rel="next" href="../Autoformer/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.1">
+    
+    
+      
+        <title>Informer - Blog</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#informer" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../../.." title="Blog" class="md-header__button md-logo" aria-label="Blog" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Blog
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Informer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange"  aria-label="切换至夜间模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换至夜间模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="orange"  aria-label="切换至日间模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换至日间模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../DEV/" class="md-tabs__link">
+          
+  
+    
+  
+  开发
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../ALGORITHM/" class="md-tabs__link">
+          
+  
+    
+  
+  算法刷题
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+    
+  
+  深度学习
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../TEST/" class="md-tabs__link">
+          
+  
+    
+  
+  测试
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Blog" class="md-nav__button md-logo" aria-label="Blog" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Blog
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../DEV/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    开发
+    
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            开发
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../ALGORITHM/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    算法刷题
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            算法刷题
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    算法基础
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            算法基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ALGORITHM/basic/1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    滑动窗口
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ALGORITHM/basic/2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    双指针
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ALGORITHM/basic/search/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    搜索
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    代码随想录
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            代码随想录
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ALGORITHM/Reflections/array/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数组
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    深度学习
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            深度学习
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    pytorch 基本操作
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            pytorch 基本操作
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Pytorch/view/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    view 和 reshape
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Pytorch/time/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CNN、LSTM与GRU
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    论文
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            论文
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Transformer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Transformer 时序预测 pytorch 实现
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Informer
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Informer
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      目前的问题和已有解决方法
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#informer_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Informer 改进
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#informer_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Informer 架构
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Informer 架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#probsparse-self-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      ProbSparse Self-Attention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#self-attention-distilling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Self-Attention Distilling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      部分数据集结果
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Autoformer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Autoformer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PatchTST/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PatchTST
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pathformer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pathformer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../iTransformer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    iTransformer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../TEST/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    测试
+    
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            测试
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      目前的问题和已有解决方法
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#informer_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Informer 改进
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#informer_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Informer 架构
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Informer 架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#probsparse-self-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      ProbSparse Self-Attention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#self-attention-distilling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Self-Attention Distilling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      部分数据集结果
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="informer">Informer<a class="headerlink" href="#informer" title="Permanent link">&para;</a></h1>
+<h2 id="_1">目前的问题和已有解决方法<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Vanilla Transformer 在解决 LSTF 问题时存在三个显著限制：</p>
+<ul>
+<li>Self-Attention 平方级的计算复杂度。</li>
+<li>堆叠多层网络，内存占用瓶颈。</li>
+<li>step-by-step 解码预测，速度较慢。</li>
+</ul>
+<p>有一些关于提高自注意力效率的先前工作：</p>
+<ul>
+<li>Sparse Transformer</li>
+<li>LogSparse Transformer</li>
+<li>Longformer</li>
+</ul>
+<p>都使用启发式方法来解决限制 1，并将 Self-Attention 机制的时间复杂度降低到 <span class="arithmatex">\(O(LlogL)\)</span>，但问题在于它们的效率增益是有限的。</p>
+<h2 id="informer_1">Informer 改进<a class="headerlink" href="#informer_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>提出 ProbSparse Self-Attention，筛选出最重要的 query，使复杂度降低到 <span class="arithmatex">\(O(LlogL)\)</span></li>
+<li>提出 Self-Attention Distilling，减少维度和网络参数量。</li>
+<li>提出 Generative Style Decoder，一步得到所有预测结果。</li>
+</ul>
+<p>左图展示了与短期预测相比，LTSF 可以预测更长的序列；右图表明随着预测序列长度增加，从 <span class="arithmatex">\(L=48\)</span> 开始，MSE 迅速增大推理速度下降。</p>
+<figure> <img alt="" src="../images/time-past.jpg" /> </figure>
+<h2 id="informer_2">Informer 架构<a class="headerlink" href="#informer_2" title="Permanent link">&para;</a></h2>
+<figure> <img alt="" src="../images/Informer.jpg" /> </figure>
+<ul>
+<li>Encoder 接受大量长序列输入。模型采用了 ProbSparse Self-Attention 代替了 Transformer 中的 Self-Attention。并且 Encoder 在堆叠时采用了 Self-Attention Distilling。</li>
+<li>Decoder 同样接受长序列输入，预测部分用 0 进行 padding。结果处理后直接输出所有预测结果。</li>
+</ul>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><span class="c1"># e_layer = 3, d_layer = 2</span>
+</span><span id="__span-0-2"><span class="n">Informer</span><span class="p">(</span>
+</span><span id="__span-0-3">  <span class="c1"># encoder embedding，编码器端的embedding</span>
+</span><span id="__span-0-4">  <span class="p">(</span><span class="n">enc_embedding</span><span class="p">):</span> <span class="n">DataEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-5">    <span class="p">(</span><span class="n">value_embedding</span><span class="p">):</span> <span class="n">TokenEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-6">      <span class="p">(</span><span class="n">tokenConv</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding_mode</span><span class="o">=</span><span class="n">circular</span><span class="p">)</span>
+</span><span id="__span-0-7">    <span class="p">)</span>
+</span><span id="__span-0-8">    <span class="p">(</span><span class="n">position_embedding</span><span class="p">):</span> <span class="n">PositionalEmbedding</span><span class="p">()</span>
+</span><span id="__span-0-9">    <span class="p">(</span><span class="n">temporal_embedding</span><span class="p">):</span> <span class="n">TimeFeatureEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-10">      <span class="p">(</span><span class="n">embed</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-11">    <span class="p">)</span>
+</span><span id="__span-0-12">    <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-13">  <span class="p">)</span>
+</span><span id="__span-0-14">  <span class="c1"># decoder embedding，解码端的embedding</span>
+</span><span id="__span-0-15">  <span class="p">(</span><span class="n">dec_embedding</span><span class="p">):</span> <span class="n">DataEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-16">    <span class="p">(</span><span class="n">value_embedding</span><span class="p">):</span> <span class="n">TokenEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-17">      <span class="p">(</span><span class="n">tokenConv</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding_mode</span><span class="o">=</span><span class="n">circular</span><span class="p">)</span>
+</span><span id="__span-0-18">    <span class="p">)</span>
+</span><span id="__span-0-19">    <span class="p">(</span><span class="n">position_embedding</span><span class="p">):</span> <span class="n">PositionalEmbedding</span><span class="p">()</span>
+</span><span id="__span-0-20">    <span class="p">(</span><span class="n">temporal_embedding</span><span class="p">):</span> <span class="n">TimeFeatureEmbedding</span><span class="p">(</span>
+</span><span id="__span-0-21">      <span class="p">(</span><span class="n">embed</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-22">    <span class="p">)</span>
+</span><span id="__span-0-23">    <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-24">  <span class="p">)</span>
+</span><span id="__span-0-25">  <span class="c1"># encoder部分</span>
+</span><span id="__span-0-26">  <span class="p">(</span><span class="n">encoder</span><span class="p">):</span> <span class="n">Encoder</span><span class="p">(</span>
+</span><span id="__span-0-27">    <span class="p">(</span><span class="n">attn_layers</span><span class="p">):</span> <span class="n">ModuleList</span><span class="p">(</span>
+</span><span id="__span-0-28">      <span class="c1"># 三个包装注意力的encoderlayer，带着conv1/conv2</span>
+</span><span id="__span-0-29">      <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span> <span class="n">EncoderLayer</span><span class="p">(</span>
+</span><span id="__span-0-30">        <span class="p">(</span><span class="n">attention</span><span class="p">):</span> <span class="n">AttentionLayer</span><span class="p">(</span>
+</span><span id="__span-0-31">          <span class="p">(</span><span class="n">inner_attention</span><span class="p">):</span> <span class="n">ProbAttention</span><span class="p">(</span>
+</span><span id="__span-0-32">            <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-33">          <span class="p">)</span>
+</span><span id="__span-0-34">          <span class="p">(</span><span class="n">query_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-35">          <span class="p">(</span><span class="n">key_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-36">          <span class="p">(</span><span class="n">value_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-37">          <span class="p">(</span><span class="n">out_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-38">        <span class="p">)</span>
+</span><span id="__span-0-39">        <span class="p">(</span><span class="n">conv1</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+</span><span id="__span-0-40">        <span class="p">(</span><span class="n">conv2</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+</span><span id="__span-0-41">        <span class="p">(</span><span class="n">norm1</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-42">        <span class="p">(</span><span class="n">norm2</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-43">        <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-44">      <span class="p">)</span>
+</span><span id="__span-0-45">    <span class="p">)</span>
+</span><span id="__span-0-46">    <span class="c1"># 2个卷积层</span>
+</span><span id="__span-0-47">    <span class="p">(</span><span class="n">conv_layers</span><span class="p">):</span> <span class="n">ModuleList</span><span class="p">(</span>
+</span><span id="__span-0-48">      <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span> <span class="n">ConvLayer</span><span class="p">(</span>
+</span><span id="__span-0-49">        <span class="p">(</span><span class="n">downConv</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">padding_mode</span><span class="o">=</span><span class="n">circular</span><span class="p">)</span>
+</span><span id="__span-0-50">        <span class="p">(</span><span class="n">norm</span><span class="p">):</span> <span class="n">BatchNorm1d</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">track_running_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-51">        <span class="p">(</span><span class="n">activation</span><span class="p">):</span> <span class="n">ELU</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</span><span id="__span-0-52">        <span class="p">(</span><span class="n">maxPool</span><span class="p">):</span> <span class="n">MaxPool1d</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ceil_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-53">      <span class="p">)</span>
+</span><span id="__span-0-54">    <span class="p">)</span>
+</span><span id="__span-0-55">    <span class="p">(</span><span class="n">norm</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-56">  <span class="p">)</span>
+</span><span id="__span-0-57">  <span class="p">(</span><span class="n">decoder</span><span class="p">):</span> <span class="n">Decoder</span><span class="p">(</span>
+</span><span id="__span-0-58">    <span class="p">(</span><span class="n">layers</span><span class="p">):</span> <span class="n">ModuleList</span><span class="p">(</span>
+</span><span id="__span-0-59">      <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span> <span class="n">DecoderLayer</span><span class="p">(</span>
+</span><span id="__span-0-60">        <span class="p">(</span><span class="n">self_attention</span><span class="p">):</span> <span class="n">AttentionLayer</span><span class="p">(</span>
+</span><span id="__span-0-61">          <span class="p">(</span><span class="n">inner_attention</span><span class="p">):</span> <span class="n">ProbAttention</span><span class="p">(</span>
+</span><span id="__span-0-62">            <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-63">          <span class="p">)</span>
+</span><span id="__span-0-64">          <span class="p">(</span><span class="n">query_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-65">          <span class="p">(</span><span class="n">key_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-66">          <span class="p">(</span><span class="n">value_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-67">          <span class="p">(</span><span class="n">out_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-68">        <span class="p">)</span>
+</span><span id="__span-0-69">        <span class="p">(</span><span class="n">cross_attention</span><span class="p">):</span> <span class="n">AttentionLayer</span><span class="p">(</span>
+</span><span id="__span-0-70">          <span class="p">(</span><span class="n">inner_attention</span><span class="p">):</span> <span class="n">FullAttention</span><span class="p">(</span>
+</span><span id="__span-0-71">            <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-72">          <span class="p">)</span>
+</span><span id="__span-0-73">          <span class="p">(</span><span class="n">query_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-74">          <span class="p">(</span><span class="n">key_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-75">          <span class="p">(</span><span class="n">value_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-76">          <span class="p">(</span><span class="n">out_projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-77">        <span class="p">)</span>
+</span><span id="__span-0-78">        <span class="p">(</span><span class="n">conv1</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+</span><span id="__span-0-79">        <span class="p">(</span><span class="n">conv2</span><span class="p">):</span> <span class="n">Conv1d</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+</span><span id="__span-0-80">        <span class="p">(</span><span class="n">norm1</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-81">        <span class="p">(</span><span class="n">norm2</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-82">        <span class="p">(</span><span class="n">norm3</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-83">        <span class="p">(</span><span class="n">dropout</span><span class="p">):</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-84">      <span class="p">)</span>
+</span><span id="__span-0-85">    <span class="p">)</span>
+</span><span id="__span-0-86">    <span class="p">(</span><span class="n">norm</span><span class="p">):</span> <span class="n">LayerNorm</span><span class="p">((</span><span class="mi">512</span><span class="p">,),</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">elementwise_affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-87">  <span class="p">)</span>
+</span><span id="__span-0-88">  <span class="p">(</span><span class="n">projection</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-89"><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><span class="hll"><span class="c1"># enc_embedding</span>
+</span></span><span id="__span-1-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_mark</span><span class="p">):</span>
+</span><span id="__span-1-3">    <span class="c1">#x[32,96,7],x_mark[32,96,4]</span>
+</span><span id="__span-1-4">    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_embedding</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_embedding</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_embedding</span><span class="p">(</span><span class="n">x_mark</span><span class="p">)</span>
+</span><span id="__span-1-5"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="__span-1-6"><span class="sd">    value_embedding x[32,96,512]</span>
+</span><span id="__span-1-7"><span class="sd">    position_embedding x[1,96,512]</span>
+</span><span id="__span-1-8"><span class="sd">    temporal_embedding x[32,96,512]</span>
+</span><span id="__span-1-9"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-1-10">    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-1-11"><span class="c1">#TokenEmbedding</span>
+</span><span id="__span-1-12"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+</span><span id="__span-1-13">    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenConv</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="__span-1-14">    <span class="c1">#x[32,96,512],permute用于改变张量维度顺序，不改变内容本身</span>
+</span><span id="__span-1-15">    <span class="k">return</span> <span class="n">x</span>
+</span></code></pre></div></td></tr></table></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><span class="hll"><span class="c1"># Informer</span>
+</span></span><span id="__span-2-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_enc</span><span class="p">,</span> <span class="n">x_mark_enc</span><span class="p">,</span> <span class="n">x_dec</span><span class="p">,</span> <span class="n">x_mark_dec</span><span class="p">,</span>
+</span><span id="__span-2-3">                <span class="n">enc_self_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dec_self_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dec_enc_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-2-4"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="__span-2-5"><span class="sd">        x_enc[32,96,7],x_mark_enc[32,96,4]</span>
+</span><span id="__span-2-6"><span class="sd">        x_dec[32,72,7],x_mark_dec[32,72,4]</span>
+</span><span id="__span-2-7"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="__span-2-8">        <span class="n">enc_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enc_embedding</span><span class="p">(</span><span class="n">x_enc</span><span class="p">,</span> <span class="n">x_mark_enc</span><span class="p">)</span>
+</span><span id="__span-2-9">        <span class="c1"># enc_out[32,96,512]</span>
+</span><span id="__span-2-10">        <span class="n">enc_out</span><span class="p">,</span> <span class="n">attns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">enc_out</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="n">enc_self_mask</span><span class="p">)</span>
+</span><span id="__span-2-11">        <span class="c1"># enc_out[32,24,512]</span>
+</span><span id="__span-2-12">
+</span><span id="__span-2-13">        <span class="n">dec_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_embedding</span><span class="p">(</span><span class="n">x_dec</span><span class="p">,</span> <span class="n">x_mark_dec</span><span class="p">)</span>
+</span><span id="__span-2-14">        <span class="c1"># dec_out[32,72,512]</span>
+</span><span id="__span-2-15">        <span class="n">dec_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">dec_out</span><span class="p">,</span> <span class="n">enc_out</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">dec_self_mask</span><span class="p">,</span> <span class="n">cross_mask</span><span class="o">=</span><span class="n">dec_enc_mask</span><span class="p">)</span>
+</span><span id="__span-2-16">        <span class="c1"># dec_out[32,72,512]</span>
+</span><span id="__span-2-17">        <span class="n">dec_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">(</span><span class="n">dec_out</span><span class="p">)</span>
+</span><span id="__span-2-18">        <span class="c1">#dec_out[32,72,7]</span>
+</span><span id="__span-2-19">        <span class="c1"># dec_out = self.end_conv1(dec_out)</span>
+</span><span id="__span-2-20">        <span class="c1"># dec_out = self.end_conv2(dec_out.transpose(2,1)).transpose(1,2)</span>
+</span><span id="__span-2-21">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_attention</span><span class="p">:</span>
+</span><span id="__span-2-22">            <span class="k">return</span> <span class="n">dec_out</span><span class="p">[:,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">pred_len</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">attns</span>
+</span><span id="__span-2-23">        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-2-24">            <span class="k">return</span> <span class="n">dec_out</span><span class="p">[:,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">pred_len</span><span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># [B, L, D]</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="encoder">Encoder<a class="headerlink" href="#encoder" title="Permanent link">&para;</a></h3>
+<figure><img alt="" src="../images/EncoderStack.jpg" /></figure>
+<p>上图展示了 EncoderStack 的架构图。一个 EncoderStack 里面包括若干个级联的 Encoder，而一个 Encoder 内部又包括了若干个 EncoderLayer 和 ConvLayer。其中在 EncoderLayer 内部加入了 ProbSparse Self-Attention。</p>
+<figure> <img alt="" src="../images/InfP1.jpg" /> </figure>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-1"><span class="hll"><span class="c1"># EncodeLayer</span>
+</span></span><span id="__span-3-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-3-3">    <span class="c1"># x [B, L, D]</span>
+</span><span id="__span-3-4">    <span class="c1"># x = x + self.dropout(self.attention(</span>
+</span><span id="__span-3-5">    <span class="c1">#     x, x, x,</span>
+</span><span id="__span-3-6">    <span class="c1">#     attn_mask = attn_mask</span>
+</span><span id="__span-3-7">    <span class="c1"># ))</span>
+</span><span id="__span-3-8">    <span class="n">new_x</span><span class="p">,</span> <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>
+</span><span id="__span-3-9">        <span class="n">attn_mask</span> <span class="o">=</span> <span class="n">attn_mask</span>
+</span><span id="__span-3-10">    <span class="p">)</span>
+</span><span id="__span-3-11">    <span class="c1"># new_x[32,96,512]</span>
+</span><span id="__span-3-12">    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">new_x</span><span class="p">)</span>
+</span><span id="__span-3-13">
+</span><span id="__span-3-14">    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-3-15">    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))))</span>
+</span><span id="__span-3-16">    <span class="c1"># conv1: Conv1d(2048,512,kernel_size=(1,),stridf=(1,))</span>
+</span><span id="__span-3-17">    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-3-18">    <span class="c1"># conv2: Conv1d(512,2048,kernel_size=(1,),stridf=(1,))</span>
+</span><span id="__span-3-19">    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),</span> <span class="n">attn</span>
+</span></code></pre></div></td></tr></table></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-1"><span class="c1"># Encoder</span>
+</span><span id="__span-4-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-4-3">  <span class="c1"># x [B, L, D]</span>
+</span><span id="__span-4-4">  <span class="n">attns</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-4-5">  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_layers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-6">      <span class="k">for</span> <span class="n">attn_layer</span><span class="p">,</span> <span class="n">conv_layer</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attn_layers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv_layers</span><span class="p">):</span>
+</span><span id="__span-4-7">          <span class="n">x</span><span class="p">,</span> <span class="n">attn</span> <span class="o">=</span> <span class="n">attn_layer</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="n">attn_mask</span><span class="p">)</span>
+</span><span id="__span-4-8">          <span class="n">x</span> <span class="o">=</span> <span class="n">conv_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-4-9">          <span class="n">attns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attn</span><span class="p">)</span>
+</span><span id="__span-4-10">        <span class="n">x</span><span class="p">,</span> <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn_layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="n">attn_mask</span><span class="p">)</span>
+</span><span id="__span-4-11">        <span class="n">attns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attn</span><span class="p">)</span>
+</span><span id="__span-4-12">  <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-4-13">      <span class="k">for</span> <span class="n">attn_layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn_layers</span><span class="p">:</span>
+</span><span id="__span-4-14">          <span class="n">x</span><span class="p">,</span> <span class="n">attn</span> <span class="o">=</span> <span class="n">attn_layer</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">attn_mask</span><span class="o">=</span><span class="n">attn_mask</span><span class="p">)</span>
+</span><span id="__span-4-15">          <span class="n">attns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attn</span><span class="p">)</span>
+</span><span id="__span-4-16">
+</span><span id="__span-4-17">  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-18">    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-4-19">
+</span><span id="__span-4-20">  <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">attns</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="decoder">Decoder<a class="headerlink" href="#decoder" title="Permanent link">&para;</a></h3>
+<p>Decoder 的 Embedding 与 Encoder 的 Embedding 操作完全相同，只是输入变为 <code>[32,72,7]</code></p>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-5-1"><span class="hll"><span class="c1"># DecoderLayer</span>
+</span></span><span id="__span-5-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cross_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-5-3">  <span class="c1">#x[32,72,512], cross[32,24,512]</span>
+</span><span id="__span-5-4">  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">self_attention</span><span class="p">(</span>
+</span><span id="__span-5-5">      <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span>
+</span><span id="__span-5-6">      <span class="n">attn_mask</span><span class="o">=</span><span class="n">x_mask</span>
+</span><span id="__span-5-7">  <span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="__span-5-8">  <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-5-9">
+</span><span id="__span-5-10">  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cross_attention</span><span class="p">(</span>
+</span><span id="__span-5-11">      <span class="n">x</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span>
+</span><span id="__span-5-12">      <span class="n">attn_mask</span><span class="o">=</span><span class="n">cross_mask</span>
+</span><span id="__span-5-13">  <span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="__span-5-14">
+</span><span id="__span-5-15">  <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-5-16">  <span class="c1">#y[32,2048,512]</span>
+</span><span id="__span-5-17">  <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))))</span>
+</span><span id="__span-5-18">  <span class="c1"># y[32,72,512]</span>
+</span><span id="__span-5-19">  <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</span><span id="__span-5-20">
+</span><span id="__span-5-21">  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm3</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-6-1"><span class="hll"><span class="c1"># Decoder</span>
+</span></span><span id="__span-6-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cross_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-6-3">  <span class="c1">#x[32,72,512], cross[32,24,512]</span>
+</span><span id="__span-6-4">  <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+</span><span id="__span-6-5">    <span class="n">x</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">cross</span><span class="p">,</span> <span class="n">x_mask</span><span class="o">=</span><span class="n">x_mask</span><span class="p">,</span> <span class="n">cross_mask</span><span class="o">=</span><span class="n">cross_mask</span><span class="p">)</span>
+</span><span id="__span-6-6">
+</span><span id="__span-6-7">  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-6-8">    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="__span-6-9">
+</span><span id="__span-6-10">  <span class="k">return</span> <span class="n">x</span>
+</span></code></pre></div></td></tr></table></div>
+<h3 id="probsparse-self-attention">ProbSparse Self-Attention<a class="headerlink" href="#probsparse-self-attention" title="Permanent link">&para;</a></h3>
+<p>传统 Self-Attention 需要 <span class="arithmatex">\(O(L_QL_K)\)</span> 的内存以及二次点积计算，是其主要缺点。本文研究发现，并不是每个 Q 与 K 之间都有很高的相关性（点积），故只有少数点积对主要注意力计算有贡献，其余可以忽略。</p>
+<figure> <img alt="" src="../images/probsparse_intro.jpg" /> </figure>
+<p>改进算法如下：</p>
+<ul>
+<li>输入序列长度为 96，首先在 K 中进行采样，随机选取 25 个 K。</li>
+<li>计算每个 Q 与 25 个 K 的内积。</li>
+<li>在每个 Q 的 25 个结果中，选择最大值与均值计算差异。</li>
+<li>将差异从大到小排列，选出差异前 25 大的 Q。</li>
+<li>其余淘汰的 Q 使用 V 的平均向量进行代替。</li>
+</ul>
+<h3 id="self-attention-distilling">Self-Attention Distilling<a class="headerlink" href="#self-attention-distilling" title="Permanent link">&para;</a></h3>
+<figure> <img alt="" src="../images/distilling.jpg" /> </figure>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-7-1"><span class="hll"><span class="c1"># AttentionLayer</span>
+</span></span><span id="__span-7-2"><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">attn_mask</span><span class="p">):</span>
+</span><span id="__span-7-3">    <span class="c1"># shape[queries=keys=values]:[32,96,512]</span>
+</span><span id="__span-7-4">    <span class="n">B</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">queries</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># L，S都为96</span>
+</span><span id="__span-7-5">    <span class="n">_</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">shape</span>
+</span><span id="__span-7-6">    <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_heads</span>
+</span><span id="__span-7-7">
+</span><span id="__span-7-8">    <span class="c1"># [32,96,512]-&gt;[32,96,8,64]</span>
+</span><span id="__span-7-9">    <span class="n">queries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_projection</span><span class="p">(</span><span class="n">queries</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-10">    <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_projection</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-11">    <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_projection</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-12">
+</span><span id="__span-7-13">    <span class="n">out</span><span class="p">,</span> <span class="n">attn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner_attention</span><span class="p">(</span>
+</span><span id="__span-7-14">        <span class="n">queries</span><span class="p">,</span>
+</span><span id="__span-7-15">        <span class="n">keys</span><span class="p">,</span>
+</span><span id="__span-7-16">        <span class="n">values</span><span class="p">,</span>
+</span><span id="__span-7-17">        <span class="n">attn_mask</span>
+</span><span id="__span-7-18">    <span class="p">)</span>
+</span><span id="__span-7-19">    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mix</span><span class="p">:</span>
+</span><span id="__span-7-20">        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+</span><span id="__span-7-21">    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-22">
+</span><span id="__span-7-23">    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_projection</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="n">attn</span>
+</span></code></pre></div></td></tr></table></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-8-1"><span class="k">def</span><span class="w"> </span><span class="nf">_prob_QK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">sample_k</span><span class="p">,</span> <span class="n">n_top</span><span class="p">):</span> <span class="c1"># n_top: c*ln(L_q)</span>
+</span><span id="__span-8-2">    <span class="c1"># Q [B, H, L, D][32,8,96,64]</span>
+</span><span id="__span-8-3">    <span class="n">B</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">L_K</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span> <span class="c1">#L_k:96,E:64,B:32,H:8</span>
+</span><span id="__span-8-4">    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">L_Q</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">shape</span> <span class="c1">#L_Q:96</span>
+</span><span id="__span-8-5">
+</span><span id="__span-8-6">    <span class="c1"># calculate the sampled Q_K</span>
+</span><span id="__span-8-7">    <span class="c1"># K_expand[32,8,96,96,64]</span>
+</span><span id="__span-8-8">    <span class="n">K_expand</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">L_Q</span><span class="p">,</span> <span class="n">L_K</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+</span><span id="__span-8-9"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="__span-8-10"><span class="sd">    index_sample[96,25]，torch.randint从[0,24]的范围随机生成整数，用于</span>
+</span><span id="__span-8-11"><span class="sd">    构建形状为[96,25]的张量</span>
+</span><span id="__span-8-12"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-8-13">    <span class="n">index_sample</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">L_K</span><span class="p">,</span> <span class="p">(</span><span class="n">L_Q</span><span class="p">,</span> <span class="n">sample_k</span><span class="p">))</span> <span class="c1"># real U = U_part(factor*ln(L_k))*L_q</span>
+</span><span id="__span-8-14"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="__span-8-15"><span class="sd">    torch.arange(L_Q).unsqueeze(1)生成一个形状为[96,1]的张量，内容为[0,95]构成的序列，加上unsqueeze(1)后，其从形状[96]变为[96,1];</span>
+</span><span id="__span-8-16"><span class="sd">    index_sample是形状为[96,25]的张量，</span>
+</span><span id="__span-8-17"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-8-18">    <span class="n">K_sample</span> <span class="o">=</span> <span class="n">K_expand</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">L_Q</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">index_sample</span><span class="p">,</span> <span class="p">:]</span>
+</span><span id="__span-8-19">    <span class="n">Q_K_sample</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">K_sample</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="__span-8-20">
+</span><span id="__span-8-21">    <span class="c1"># find the Top_k query with sparisty measurement</span>
+</span><span id="__span-8-22">    <span class="n">M</span> <span class="o">=</span> <span class="n">Q_K_sample</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">Q_K_sample</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">L_K</span><span class="p">)</span>
+</span><span id="__span-8-23">    <span class="n">M_top</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">topk</span><span class="p">(</span><span class="n">n_top</span><span class="p">,</span> <span class="nb">sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="__span-8-24">
+</span><span id="__span-8-25">    <span class="c1"># use the reduced Q to calculate Q_K</span>
+</span><span id="__span-8-26">    <span class="n">Q_reduce</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">B</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">H</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span>
+</span><span id="__span-8-27">            <span class="n">M_top</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># factor*ln(L_q)</span>
+</span><span id="__span-8-28">    <span class="n">Q_K</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q_reduce</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># factor*ln(L_q)*L_k</span>
+</span><span id="__span-8-29">
+</span><span id="__span-8-30">    <span class="k">return</span> <span class="n">Q_K</span><span class="p">,</span> <span class="n">M_top</span>
+</span></code></pre></div></td></tr></table></div>
+<h2 id="_2">部分数据集结果<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ETTh1</th>
+<th>ETTh2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mse</td>
+<td>0.428</td>
+<td>0.248</td>
+</tr>
+<tr>
+<td>mae</td>
+<td>0.580</td>
+<td>0.405</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.top", "navigation.indexes", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.5090c770.min.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+      
+    
+  </body>
+</html>
