@@ -5,11 +5,6 @@ site_url: https://yyyac.github.io
 nav:
   - 开发:
     - DEV/index.md
-    - C++:
-      - DEV/Cpp/1.md
-      - DEV/Cpp/2.md
-      - DEV/Cpp/3.md
-      - DEV/Cpp/4.md
   - 算法刷题:
     - ALGORITHM/index.md
     - 算法基础:
@@ -28,6 +23,8 @@ nav:
       - DeepL/Paper/informer.md
       - DeepL/Paper/Autoformer.md
       - DeepL/Paper/PatchTST.md
+      - DeepL/Paper/pathformer.md
+      - DeepL/Paper/iTransformer.md
   - 测试:
     - TEST/index.md
 

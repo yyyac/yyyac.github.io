@@ -1,188 +1,223 @@
-# Transformer 以及 pyorch 实现
+# Transformer 时序预测 pytorch 实现
 
-## Pad mask
+## DateEmbedding
+
+原始的token（单词、字词、时间片段的索引）是纯粹的整数索引，没有任何语义上的连续信息。为了让模型理解并处理这些离散符号，需要将其映射到一个连续向量空间中，即通过 `tokenEmbedding`（词嵌入）将离散的 token 转化为可训练的密集向量表示。
+
+`TimeFeatureEmbedding` 的作用是对时间特征（如月、日、周、小时等）进行嵌入（embedding）处理。与传统的`tokenEmbedding`不同，这里不是对离散的词或标记进行嵌入，而是针对时间序列数据中每个时间点的时间特征（由时间戳提取出的数值，如月份、星期几、小时数等）。
+
+`PositionalEmbedding`（位置嵌入）的作用是为序列数据中的每个位置（如词在句子中的位置、时间步在时间序列中的位置）提供位置信息，使模型可以区分序列中不同元素的顺序和相对关系。
+
+在 Transformer 这类使用自注意力机制的模型中，注意力机制本身并没有顺序感。也就是说，如果仅有 token 的嵌入表示，模型只看到了元素的内容表示（如词向量），而不知道这些元素在输入序列中的顺序。为了解决这个问题，需要为每个 token 或数据点添加对应的位置信息，使模型能够感知顺序和距离。
 
 ```python
-def get_attn_pad_mask(seq_q, seq_k):
-    '''
-    seq_q: [batch_size, seq_len]
-    seq_k: [batch_size, seq_len]
-    seq_len could be src_len or it could be tgt_len
-    seq_len in seq_q and seq_len in seq_k maybe not equal
-    '''
-    batch_size, len_q = seq_q.size()
-    batch_size, len_k = seq_k.size()
-    # eq(zero) is PAD token
-    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)  # [batch_size, 1, len_k], False is masked
-    return pad_attn_mask.expand(batch_size, len_q, len_k)  # [batch_size, len_q, len_k]
+class DataEmbedding(nn.Module):
+    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+        super(DataEmbedding, self).__init__()
+
+        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
+        self.position_embedding = PositionalEmbedding(d_model=d_model)
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
+                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
+            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.dropout = nn.Dropout(p=dropout)
+
+    def forward(self, x, x_mark):
+        x = self.value_embedding(x) + self.temporal_embedding(x_mark) + self.position_embedding(x)
+        return self.dropout(x)
 ```
 
-`seq_k.data.eq(0)` 返回大小和 `seq_k` 相同的 tensor。将 `seq_k` 值为 0 的位置返回 True，否则返回 False。例如输入为：`seq_k=[1,2,3,4,0]`，返回 `[F,F,F,F,T]`。后续在注意力机制计算时通过 `scores.masked_fill_(attn_mask, -1e9)`，将 `True` 填充为 `-inf`。
-
-
-## Masked Self-Attention
+### PositionalEmbedding
 
 ```python
-def get_attn_subsequence_mask(seq):
-    '''
-    seq: [batch_size, tgt_len]
-    '''
-    attn_shape = [seq.size(0), seq.size(1), seq.size(1)]
-    subsequence_mask = np.triu(np.ones(attn_shape), k=1)  # Upper triangular matrix
-    subsequence_mask = torch.from_numpy(subsequence_mask).byte()
-    return subsequence_mask  # [batch_size, tgt_len, tgt_len]
+class PositionalEmbedding(nn.Module):
+    def __init__(self, d_model, max_len=5000):
+        super(PositionalEmbedding, self).__init__()
+        # Compute the positional encodings once in log space.
+        pe = torch.zeros(max_len, d_model).float()
+        pe.require_grad = False
+
+        position = torch.arange(0, max_len).float().unsqueeze(1)
+        div_term = (torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)).exp()
+
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        return self.pe[:, :x.size(1)]
 ```
 
-在训练时，是把正确结果传入 Decoder。由于采用了 Self-Attention，模型会关注到所有信息，但模型不应知道当前时刻之后的信息，所有要进行 mask 处理。通过计算得到 Scaled Scores 后，只需再生成一个下三角全为 0，上三角全为负无穷的矩阵，然后与 Scaled Scores 相加即可。之后再做 softmax，就能将负无穷变为 0，因此当前时刻之后的信息也就被掩盖了。
+### TokenEmbedding
 
-## FeedForward Layer
+采用一维卷积实现，encoder：`[32,96,7]->[32,96,512]`，decoder：`[32,72,7]->[32,72,512]`
 
 ```python
-class PoswiseFeedForwardNet(nn.Module):
-    def __init__(self):
-        super(PoswiseFeedForwardNet, self).__init__()
-        self.fc = nn.Sequential(
-            nn.Linear(d_model, d_ff, bias=False),
-            nn.ReLU(),
-            nn.Linear(d_ff, d_model, bias=False)
+class TokenEmbedding(nn.Module):
+    def __init__(self, c_in, d_model):
+        super(TokenEmbedding, self).__init__()
+        padding = 1 if compared_version(torch.__version__, '1.5.0') else 2
+        self.tokenConv = nn.Conv1d(in_channels=c_in, out_channels=d_model,
+                                   kernel_size=3, padding=padding, padding_mode='circular', bias=False)
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
+
+    def forward(self, x):
+        x = self.tokenConv(x.permute(0, 2, 1)).transpose(1, 2)
+        return x
+```
+
+### TimeFeatureEmbedding
+
+在ETTh数据中，将时间拆分为4个维度：月、天、周以及小时。`[32,96\72,4]->[32,96\72,512]`
+
+```py
+class TimeFeatureEmbedding(nn.Module):
+    def __init__(self, d_model, embed_type='timeF', freq='h'):
+        super(TimeFeatureEmbedding, self).__init__()
+
+        freq_map = {'h': 4, 't': 5, 's': 6, 'm': 1, 'a': 1, 'w': 2, 'd': 3, 'b': 3}
+        d_inp = freq_map[freq]
+        self.embed = nn.Linear(d_inp, d_model, bias=False)
+
+    def forward(self, x):
+        return self.embed(x)
+```
+
+## AttentionLayer
+
+```python
+class AttentionLayer(nn.Module):
+    def __init__(self, attention, d_model, n_heads, d_keys=None,
+                 d_values=None):
+        super(AttentionLayer, self).__init__()
+
+        d_keys = d_keys or (d_model // n_heads)
+        d_values = d_values or (d_model // n_heads)
+
+        self.inner_attention = attention
+        self.query_projection = nn.Linear(d_model, d_keys * n_heads)
+        self.key_projection = nn.Linear(d_model, d_keys * n_heads)
+        self.value_projection = nn.Linear(d_model, d_values * n_heads)
+        self.out_projection = nn.Linear(d_values * n_heads, d_model)
+        self.n_heads = n_heads
+
+    def forward(self, queries, keys, values, attn_mask):
+        B, L, _ = queries.shape
+        _, S, _ = keys.shape
+        H = self.n_heads
+
+        queries = self.query_projection(queries).view(B, L, H, -1)
+        keys = self.key_projection(keys).view(B, S, H, -1)
+        values = self.value_projection(values).view(B, S, H, -1)
+
+        out, attn = self.inner_attention(
+            queries,
+            keys,
+            values,
+            attn_mask
         )
+        out = out.view(B, L, -1)
 
-    def forward(self, inputs):
-        '''
-        inputs: [batch_size, seq_len, d_model]
-        '''
-        residual = inputs
-        output = self.fc(inputs)
-        return nn.LayerNorm(d_model).cuda()(output + residual)  # [batch_size, seq_len, d_model]
+        return self.out_projection(out), attn
 ```
 
-两个线性层加一个激活函数，之后是残差连接和 LayerNorm。
-
-## ScaledDotProductAttention
+### FullAttention
 
 ```python
-class ScaledDotProductAttention(nn.Module):
-    def __init__(self):
-        super(ScaledDotProductAttention, self).__init__()
+class FullAttention(nn.Module):
+    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+        super(FullAttention, self).__init__()
+        self.scale = scale
+        self.mask_flag = mask_flag
+        self.output_attention = output_attention
+        self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, Q, K, V, attn_mask):
-        '''
-        Q: [batch_size, n_heads, len_q, d_k]
-        K: [batch_size, n_heads, len_k, d_k]
-        V: [batch_size, n_heads, len_v(=len_k), d_v]
-        attn_mask: [batch_size, n_heads, seq_len, seq_len]
-        '''
-        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(d_k)  # scores : [batch_size, n_heads, len_q, len_k]
-        scores.masked_fill_(attn_mask, -1e9)  # Fills elements of self tensor with value where mask is True.
+    def forward(self, queries, keys, values, attn_mask):
+        B, L, H, E = queries.shape
+        _, S, _, D = values.shape
+        scale = self.scale or 1. / sqrt(E)
 
-        attn = nn.Softmax(dim=-1)(scores)
-        context = torch.matmul(attn, V)  # [batch_size, n_heads, len_q, d_v]
-        return context, attn
+        scores = torch.einsum("blhe,bshe->bhls", queries, keys)
+
+        if self.mask_flag:
+            if attn_mask is None:
+                attn_mask = TriangularCausalMask(B, L, device=queries.device)
+
+            scores.masked_fill_(attn_mask.mask, -np.inf)
+
+        A = self.dropout(torch.softmax(scale * scores, dim=-1))
+        V = torch.einsum("bhls,bshd->blhd", A, values)
+
+        if self.output_attention:
+            return (V.contiguous(), A)
+        else:
+            return (V.contiguous(), None)
 ```
 
-通过 Q 和 K 计算得到 scores，然后对 scores 进行 mask，之后进行 softmax 后再与 V 相乘，得到 context。
+## Encoder
 
-## MultiHeadAttention
+`Encoder` 是由多个 `EncoderLayer` 组成的模块列表。每个 `EncoderLayer` 包含一个 `AttentionLayer` 和前馈网络（Feed-Forward Network），并通过堆叠多个 `EncoderLayer`，`Encoder` 能够逐层处理输入数据，逐步提取更高级的特征。
 
 ```python
-class MultiHeadAttention(nn.Module):
-    def __init__(self):
-        super(MultiHeadAttention, self).__init__()
-        self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
-        self.fc = nn.Linear(n_heads * d_v, d_model, bias=False)
+class Encoder(nn.Module):
+    def __init__(self, attn_layers, conv_layers=None, norm_layer=None):
+        super(Encoder, self).__init__()
+        self.attn_layers = nn.ModuleList(attn_layers)
+        self.conv_layers = nn.ModuleList(conv_layers) if conv_layers is not None else None
+        self.norm = norm_layer
 
-    def forward(self, input_Q, input_K, input_V, attn_mask):
-        '''
-        input_Q: [batch_size, len_q, d_model]
-        input_K: [batch_size, len_k, d_model]
-        input_V: [batch_size, len_v(=len_k), d_model]
-        attn_mask: [batch_size, seq_len, seq_len]
-        '''
-        residual, batch_size = input_Q, input_Q.size(0)
-        # (B, S, D) -proj-> (B, S, D_new) -split-> (B, S, H, W) -trans-> (B, H, S, W)
-        # Q: [batch_size, n_heads, len_q, d_k]
-        Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k).transpose(1, 2)
-        # K: [batch_size, n_heads, len_k, d_k]
-        K = self.W_K(input_K).view(batch_size, -1, n_heads, d_k).transpose(1, 2)
-        # V: [batch_size, n_heads, len_v(=len_k), d_v]
-        V = self.W_V(input_V).view(batch_size, -1, n_heads, d_v).transpose(1,2)  
-                                                                           
-        # attn_mask : [batch_size, n_heads, seq_len, seq_len]
-        attn_mask = attn_mask.unsqueeze(1).repeat(1, n_heads, 1,1)
+    def forward(self, x, attn_mask=None):
+        # x [B, L, D]
+        attns = []
+        if self.conv_layers is not None:
+            for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
+                x, attn = attn_layer(x, attn_mask=attn_mask)
+                x = conv_layer(x)
+                attns.append(attn)
+            x, attn = self.attn_layers[-1](x)
+            attns.append(attn)
+        else:
+            for attn_layer in self.attn_layers:
+                x, attn = attn_layer(x, attn_mask=attn_mask)
+                attns.append(attn)
 
-        # context: [batch_size, n_heads, len_q, d_v], attn: [batch_size, n_heads, len_q, len_k]
-        context, attn = ScaledDotProductAttention()(Q, K, V, attn_mask)
-        # context: [batch_size, len_q, n_heads * d_v]
-        context = context.transpose(1, 2).reshape(batch_size, -1, n_heads * d_v)
-        output = self.fc(context)  # [batch_size, len_q, d_model]
-        return nn.LayerNorm(d_model).cuda()(output + residual), attn
+        if self.norm is not None:
+            x = self.norm(x)
+
+        return x, attns
 ```
 
-在多头注意力机制中，“其他头”实际上是通过对查询（$Q$）、键（$K$）、和值（$V$）向量的多次线性变换和分割操作实现的。每个头的计算实际上都是独立的，但在代码中它们是通过一次批量操作实现的。因此，我们从代码的角度可以看到多个头是如何实现的，而不用单独列出每个头。以下详细解释如何观察和理解“其他头”的存在：
+### Encoder_layer
 
-**不同头的生成方式**
-
-在代码中，多头是通过 `self.W_Q`、`self.W_K` 和 `self.W_V` 这三个线性层生成的。每个线性层会将输入维度从 `d_model`（如 512 维）转换为 `n_heads * d_k`（如 $8 \times 64 = 512$ 维），并通过 `view` 和 `transpose` 将其划分成多个头。具体代码如下：
+**`EncoderLayer` 类**：表示编码器中的单个层，每一层包含一个注意力机制（`AttentionLayer`）和一个前馈神经网络（通过两个卷积层实现）。每个 `EncoderLayer` 负责对输入进行一次自注意力计算和一次非线性变换，从而逐步提取输入的高级特征。
 
 ```python
-# Q: [batch_size, n_heads, len_q, d_k]
-Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k).transpose(1, 2)
-# K: [batch_size, n_heads, len_k, d_k]
-K = self.W_K(input_K).view(batch_size, -1, n_heads, d_k).transpose(1, 2)
-# V: [batch_size, n_heads, len_v, d_v]
-V = self.W_V(input_V).view(batch_size, -1, n_heads, d_v).transpose(1, 2)
+class EncoderLayer(nn.Module):
+    def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
+        super(EncoderLayer, self).__init__()
+        d_ff = d_ff or 4 * d_model
+        self.attention = attention
+        self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
+        self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = F.relu if activation == "relu" else F.gelu
+
+    def forward(self, x, attn_mask=None):
+        new_x, attn = self.attention(
+            x, x, x,
+            attn_mask=attn_mask
+        )
+        x = x + self.dropout(new_x)
+
+        y = x = self.norm1(x)
+        y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))
+        y = self.dropout(self.conv2(y).transpose(-1, 1))
+
+        return self.norm2(x + y), attn
 ```
-
-这里的 `.view(batch_size, -1, n_heads, d_k).transpose(1, 2)` 操作，将 $Q$、$K$、$V$ 从形状 `(batch_size, seq_len, n_heads * d_k)` 转换为 `(batch_size, n_heads, seq_len, d_k)`。这样一来，`n_heads` 维度就代表了“多个头”。
-
-例如，假设 `batch_size=2`、`seq_len=10`、`n_heads=8`、`d_k=64`，则此时 $Q$、$K$、$V$ 的形状将为 `(2, 8, 10, 64)`。在这种形状下，每个头独立地占据了 `n_heads` 维度的一个位置，因此第一个头的 Q 向量在 `Q[:, 0, :, :]`，第二个头的 Q 向量在 `Q[:, 1, :, :]`，以此类推。
-
-**其他头是如何并行计算的**
-
-虽然代码中没有单独列出每个头的具体计算，但因为我们将 $Q$、$K$、$V$ 的形状改成了 `(batch_size, n_heads, seq_len, d_k)`，PyTorch 可以自动在 `n_heads` 维度上并行计算每个头的注意力。具体在 `ScaledDotProductAttention` 中，代码如下：
-
-```python
-# scores : [batch_size, n_heads, len_q, len_k]
-scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(d_k)
-```
-
-这里的矩阵乘法 `torch.matmul(Q, K.transpose(-1, -2))` 会在 `n_heads` 维度上进行并行操作，计算每个头的注意力分数。这样，每个头的 Q 和 K 都会分别进行矩阵乘法，得到自己的注意力分数，不需要单独写出每个头的计算。
-
-**观察多头的输出**
-
-每个头的注意力计算完成后，得到的 `context` 的形状为 `[batch_size, n_heads, len_q, d_v]`。我们可以在 `n_heads` 维度上看到每个头的输出：
-
-```python
-# context 的形状为 [batch_size, n_heads, len_q, d_v]
-context, attn = ScaledDotProductAttention()(Q, K, V, attn_mask)
-```
-
-此时，`context[:, i, :, :]` 就表示第 $i$ 个头的输出。比如，如果 `context` 的形状是 `(2, 8, 10, 64)`，则：
-
-- `context[:, 0, :, :]` 是第一个头的输出。
-- `context[:, 1, :, :]` 是第二个头的输出。
-- ……直到 `context[:, 7, :, :]` 表示第八个头的输出。
-
-**合并多头输出**
-
-在多头注意力机制中，所有头的输出最终会通过 `transpose` 和 `reshape` 操作拼接到一起，形成一个完整的输出。在代码中，合并操作如下：
-
-```python
-# context: [batch_size, len_q, n_heads * d_v]
-context = context.transpose(1, 2).reshape(batch_size, -1, n_heads * d_v)
-```
-
-- `transpose(1, 2)` 将 `n_heads` 维度移动到 `len_q` 的后面。
-- `reshape(batch_size, -1, n_heads * d_v)` 将所有头的输出拼接在一起，形成形状 `[batch_size, len_q, n_heads * d_v]`。
-
-这样，多个头的输出被合并成一个大的输出，后续再通过线性层映射到 `d_model` 维度。
-
-**总结**
-
-- 每个头的 $Q$、$K$、$V$ 是通过线性层 `self.W_Q`、`self.W_K` 和 `self.W_V` 生成的，并通过 `view` 和 `transpose` 进行分头处理。
-- `n_heads` 维度表示每个头的独立空间，通过在 `n_heads` 维度上的并行计算，可以在代码中同时处理所有头，而不需要分别计算。
-- 多头的输出最终通过 `transpose` 和 `reshape` 拼接在一起，并通过线性层映射回 `d_model` 维度。
-
-因此，虽然没有单独列出每个头的计算过程，但所有头的计算在 `n_heads` 维度上是并行完成的，通过观察 `n_heads` 维度的大小（如 8）就可以理解“多个头”的存在。

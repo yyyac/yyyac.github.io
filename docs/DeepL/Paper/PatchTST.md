@@ -40,7 +40,7 @@ channel-independence patch time series Transformer(PatchTST)
 - 随机掩码，遮蔽数据块
 - 重建被掩码的 patch
 
-**解决两个问题**
+**解决的问题**
 
 - 掩盖数据点，插值导致模型无法学习到重要的抽象表示
 
